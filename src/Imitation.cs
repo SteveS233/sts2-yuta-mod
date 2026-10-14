@@ -10,7 +10,9 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace YigguMod;
@@ -18,7 +20,8 @@ namespace YigguMod;
 /// <summary>
 /// 模仿 —— 4 费攻击。升级后降为 3 费。稀有度：稀有（CardRarity.Rare）。
 ///   里香造成 30 点伤害。斩杀时，里香吞下一项术式：
-///   从 3 张其他角色的牌中选择 1 张，存入约定之戒（精英与首领战中候选为稀有牌）。
+///   战斗结束后获得一份术式奖励 —— 从 3 张其他角色的牌中选择 1 张，存入约定之戒
+///   （精英与首领战中候选为稀有牌）。写法照抄官方「狩猎」，见 TechniqueReward。
 ///
 /// 原作：里香吃下对方身体的一部分，乙骨便能复制其术式。储存的术式只能在完全显现时取用，
 /// 取用方式见 CopiedTechniques（「完全显现」与「忧太，要用哪个？」）。
@@ -93,8 +96,14 @@ public sealed class Imitation : CardModel
 			return;
 		}
 
-		// ④ 里香吞下一项术式：三选一，存入约定之戒（精英 / 首领战为稀有牌）
-		await CopiedTechniques.DevourAsync(choiceContext, base.Owner, rareInEliteFights: true);
+		// ④ 里香吞下一项术式：登记一份战后的术式奖励（精英 / 首领战为稀有牌）。
+		//    不在此处弹选择框 —— 斩杀的若是最后一个敌人，战斗立刻结束，选择框没有机会出现。
+		if (base.CombatState.RunState.CurrentRoom is CombatRoom combatRoom)
+		{
+			combatRoom.AddExtraReward(base.Owner, TechniqueReward.Create(base.Owner, combatRoom.RoomType));
+			CopiedTechniques.Ring(base.Owner)?.Flash();
+			Log.Info($"[YigguMod] 模仿斩杀：登记术式奖励（{combatRoom.RoomType}）");
+		}
 	}
 
 	protected override void OnUpgrade()

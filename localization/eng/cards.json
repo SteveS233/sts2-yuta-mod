@@ -8,7 +8,7 @@
   "REVERSE_CURSED_TECHNIQUE.title": "Reverse Cursed Technique",
   "REVERSE_CURSED_TECHNIQUE.description": "Gain {RegenPower:diff()} [gold]Regeneration[/gold].",
   "IMITATION.title": "Imitation",
-  "IMITATION.description": "[gold]Rika[/gold] deals {RikaDamage:diff()} damage.\nIf [gold]Fatal[/gold], Rika devours a [gold]Technique[/gold]: choose 1 of 3 cards from other characters to store in the [gold]Promise Ring[/gold]. Rare cards in Elite and Boss fights.",
+  "IMITATION.description": "[gold]Rika[/gold] deals {RikaDamage:diff()} damage.\nIf [gold]Fatal[/gold], after combat gain a [gold]Technique[/gold] reward: choose 1 of 3 cards from other characters to store in the [gold]Promise Ring[/gold]. Rare cards in Elite and Boss fights.",
   "BIND.title": "Bind",
   "BIND.description": "Lose {HpLoss:diff()} HP. [gold]Full Manifestation[/gold] lasts {FullManifestationPower:diff()} more turns.",
   "WHICH_ONE_YUTA.title": "Yuta, Which One?",

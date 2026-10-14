@@ -14,7 +14,7 @@ namespace YigguMod;
 ///   里香吞下一项术式：从 3 张其他角色的牌中选择 1 张存入约定之戒。
 ///   需要里香在场。
 ///
-/// 复制术式体系的第二个来源（第一个是「模仿」的斩杀）。不需要斩杀，
+/// 复制术式体系的第二个来源（第一个是「模仿」的斩杀）。不需要斩杀、当场选择，
 /// 因此不享受「精英 / 首领战为稀有牌」的加成。逻辑在 CopiedTechniques.DevourAsync。
 ///
 /// 【美术占位】卡图复用铁甲战士「掠夺」。
@@ -46,7 +46,7 @@ public sealed class Devour : CardModel
 		{
 			return;
 		}
-		await CopiedTechniques.DevourAsync(choiceContext, base.Owner, rareInEliteFights: false);
+		await CopiedTechniques.DevourAsync(choiceContext, base.Owner);
 	}
 
 	protected override void OnUpgrade()

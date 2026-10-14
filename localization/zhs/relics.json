@@ -1,5 +1,6 @@
 {
   "PROMISE_RING.title": "约定之戒",
   "PROMISE_RING.description": "每场战斗开始时，[gold]里香[/gold]以部分显现陪在你身边。\n开局时将一张[gold]完全显现[/gold]加入你的牌组。\n里香最多储存[blue]5[/blue]项[gold]术式[/gold]（复制来的牌），只能在完全显现时取用。{CardTitles.StringValue:cond:\n\n储存的术式：\n{}|}",
-  "PROMISE_RING.flavor": "儿时许下的约定，如今是把她留在身边的契约。"
+  "PROMISE_RING.flavor": "儿时许下的约定，如今是把她留在身边的契约。",
+  "PROMISE_RING.rewardDescription": "将一项[gold]术式[/gold]存入约定之戒"
 }

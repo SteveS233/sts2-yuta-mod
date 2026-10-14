@@ -8,7 +8,7 @@
   "REVERSE_CURSED_TECHNIQUE.title": "反轉術式",
   "REVERSE_CURSED_TECHNIQUE.description": "獲得{RegenPower:diff()}層[gold]再生[/gold]。",
   "IMITATION.title": "模仿",
-  "IMITATION.description": "[gold]里香[/gold]造成{RikaDamage:diff()}點傷害。\n[gold]斬殺[/gold]時，里香吞下一項[gold]術式[/gold]：從3張其他角色的牌中選擇1張存入[gold]約定之戒[/gold]。精英與首領戰中為稀有牌。",
+  "IMITATION.description": "[gold]里香[/gold]造成{RikaDamage:diff()}點傷害。\n[gold]斬殺[/gold]時，戰鬥結束後獲得一份[gold]術式[/gold]獎勵：從3張其他角色的牌中選擇1張存入[gold]約定之戒[/gold]。精英與首領戰中為稀有牌。",
   "BIND.title": "束縛",
   "BIND.description": "失去{HpLoss:diff()}點生命，[gold]完全顯現[/gold]的回合數+{FullManifestationPower:diff()}。",
   "WHICH_ONE_YUTA.title": "憂太，要用哪個？",
