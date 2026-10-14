@@ -494,3 +494,29 @@
       2. 判断精英/Boss 要用房间类型而非地图点类型（RoomType vs MapPointType），
          源码注释专门警告过二者会不一致（例如在 ? 事件里选择开战）
   · 结论：用户决定先行搁置，改日再议。本条不涉及任何代码改动
+
+
+[2026-10-14 17:58] （项目里程碑，非效果改动）mod 已发布到 GitHub
+  · 仓库地址：https://github.com/SteveS233/sts2-yuta-mod
+      可见性 public，默认分支 main，初始提交 777c37e
+      描述：杀戮尖塔 2 角色 mod：乙骨忧太，以及围绕召唤物「里香」设计的一套卡牌
+      标签：slay-the-spire-2 / sts2 / mod / godot / csharp / harmony
+  · 仓库内容：38 个文件，约 132 KB
+      src/（16 个 .cs）、localization/（eng/zhs/zht）、tools/（5 个构建脚本）、
+      build.ps1、YigguMod.csproj、mod_manifest.json、README.md、mod修改记录.txt
+  · 刻意排除（并在 .gitignore 中固定下来）
+      sts2-master-main/  反编译的游戏源码 57.8 MB —— 版权属 MegaCrit，不可分发
+      乙骨/assets/       从游戏提取的贴图/材质 —— 同上，且属构建产物
+      build/ bin/ obj/   构建产物
+      tools/__pycache__/ Python 字节码缓存
+    这些素材改为在构建时由 tools/make_char_assets.py 从本机游戏安装目录生成，
+    因此别人克隆后跑一次 build.ps1 就能得到，不涉及分发
+  · 为使仓库自包含所做的调整
+      把 5 个构建脚本收进 乙骨/tools/，build.ps1 改为优先使用仓库内的副本
+      （找不到时回退到工作区共享的 ../tools），已验证构建通过
+  · 已复核
+      远程文件清单与本地提交一致，未混入任何素材/PCK/DLL/字节码
+      远程 build.ps1 保留 UTF-8 BOM（缺了它脚本内的中文会导致解析失败，
+      别人克隆后无法构建）
+  · 待办：仓库尚未选定开源许可（当前默认保留所有权利）
+  · 本条不涉及任何 mod 效果改动
