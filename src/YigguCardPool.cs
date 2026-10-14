@@ -64,6 +64,12 @@ public sealed class YigguCardPool : CardPoolModel
 	///     能力：WhichOneYuta(稀有)
 	/// （Basic 的咒力强化、完全显现不计入，商店会过滤掉它们）
 	///
+	/// 【事件「药水的未来」的要求更严】它按「稀有度 × 类型」从本卡池里找牌，
+	/// 以下每格至少要有一张非 Basic 牌，否则选该选项会抛
+	///   InvalidOperationException: Tried to create a card for a reward, but we couldn't generate a valid card!
+	///     普通：攻击、技能      罕见：攻击、技能、能力      稀有：攻击、技能、能力
+	/// 目前缺：普通攻击、罕见能力、稀有技能。
+	///
 	/// 卡牌奖励没有这个硬要求：其允许稀有度由池子实际内容推导，
 	/// 再配合 GetNextAllowedRarity 的向上取整 + 环绕，只要还有任意非 Basic 牌就能兜住。
 	/// </summary>

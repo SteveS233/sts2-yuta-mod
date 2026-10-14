@@ -2,7 +2,7 @@
   "RIKA_POWER.title": "Rika",
   "RIKA_POWER.description": "Yuta's summon. Normally partially manifested at his side, attacking on his behalf.\nDuring Full Manifestation she takes attacks for Yuta; once she falls, she is gone for the rest of combat.",
   "WHICH_ONE_YUTA_POWER.title": "Yuta, Which One?",
-  "WHICH_ONE_YUTA_POWER.description": "During Full Manifestation, at the start of each turn choose 1 of 3 cards from other characters and add it to your hand. It costs 0 this turn.",
+  "WHICH_ONE_YUTA_POWER.description": "During Full Manifestation, at the start of each turn choose 1 of 3 cards to add to your hand. It costs 0 this turn. Rika's stored Techniques are offered first; cards from other characters fill the rest.",
   "FULL_MANIFESTATION_POWER.title": "Full Manifestation",
   "FULL_MANIFESTATION_POWER.description": "At the start of each turn, gain 2 additional Energy.\nAttack damage Yuta would take is dealt to Rika instead.\nThe amount is the number of turns remaining; at 0 Rika returns to partial manifestation."
 }

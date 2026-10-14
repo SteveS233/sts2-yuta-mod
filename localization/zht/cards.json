@@ -1,6 +1,6 @@
 {
   "FULL_MANIFESTATION.title": "完全顯現",
-  "FULL_MANIFESTATION.description": "使[gold]里香[/gold][gold]完全顯現[/gold]5回合。",
+  "FULL_MANIFESTATION.description": "使[gold]里香[/gold][gold]完全顯現[/gold]5回合。\n若她儲存了[gold]術式[/gold]，從中選擇1張加入你的[gold]手牌[/gold]，本回合免費打出。",
   "CURSED_ENERGY_REINFORCEMENT.title": "咒力強化",
   "CURSED_ENERGY_REINFORCEMENT.description": "獲得X點[gold]力量[/gold]，獲得X點[gold]敏捷[/gold]，獲得{Block:diff()}點[gold]格擋[/gold]。{IfUpgraded:show:\n獲得X點能量。|}",
   "KNOCK_IT_DOWN.title": "打下來！",
@@ -8,9 +8,9 @@
   "REVERSE_CURSED_TECHNIQUE.title": "反轉術式",
   "REVERSE_CURSED_TECHNIQUE.description": "獲得{RegenPower:diff()}層[gold]再生[/gold]。",
   "IMITATION.title": "模仿",
-  "IMITATION.description": "[gold]里香[/gold]造成{RikaDamage:diff()}點傷害。\n[gold]斬殺[/gold]時，獲得該敵人身上的所有正面效果（力量除外）。\n奪取的效果僅在[gold]完全顯現[/gold]期間生效。",
+  "IMITATION.description": "[gold]里香[/gold]造成{RikaDamage:diff()}點傷害。\n[gold]斬殺[/gold]時，里香吞下一項[gold]術式[/gold]：從3張其他角色的牌中選擇1張存入[gold]約定之戒[/gold]。精英與首領戰中為稀有牌。",
   "BIND.title": "束縛",
   "BIND.description": "失去{HpLoss:diff()}點生命，[gold]完全顯現[/gold]的回合數+{FullManifestationPower:diff()}。",
   "WHICH_ONE_YUTA.title": "憂太，要用哪個？",
-  "WHICH_ONE_YUTA.description": "[gold]完全顯現[/gold]期間，每回合開始從 3 張其他角色的{IfUpgraded:show:[gold]升級過的[/gold]|}牌中選擇 1 張加入你的[gold]手牌[/gold]。這張牌在本回合免費打出。"
+  "WHICH_ONE_YUTA.description": "[gold]完全顯現[/gold]期間，每回合開始從3張{IfUpgraded:show:[gold]升級過的[/gold]|}牌中選擇1張加入你的[gold]手牌[/gold]，本回合免費打出。\n候選優先取自里香儲存的[gold]術式[/gold]，不足時用其他角色的牌補足。"
 }

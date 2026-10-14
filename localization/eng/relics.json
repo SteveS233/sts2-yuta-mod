@@ -1,5 +1,5 @@
 {
   "PROMISE_RING.title": "Promise Ring",
-  "PROMISE_RING.description": "At the start of each combat, [gold]Rika[/gold] stays at your side, partially manifested.\nAt the start of the run, add a [gold]Full Manifestation[/gold] to your deck.",
+  "PROMISE_RING.description": "At the start of each combat, [gold]Rika[/gold] stays at your side, partially manifested.\nAt the start of the run, add a [gold]Full Manifestation[/gold] to your deck.\nRika can store up to [blue]5[/blue] [gold]Techniques[/gold] (copied cards), usable only during Full Manifestation.{CardTitles.StringValue:cond:\n\nStored Techniques:\n{}|}",
   "PROMISE_RING.flavor": "A childhood promise, now the bond that keeps her close."
 }

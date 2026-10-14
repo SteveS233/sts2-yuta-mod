@@ -45,3 +45,22 @@ internal static class FifteenBossesDefeatedEpochPatch
 		return __exception is ArgumentOutOfRangeException ? null : __exception;
 	}
 }
+
+/// <summary>
+/// 击败每一幕的 Boss 后，游戏会按角色 ID 拼出「角色解锁纪元」的 ID 去查：
+///     EpochModel.Get(角色ID大写 + "2_EPOCH")   // 第 1 幕，之后是 3_EPOCH、4_EPOCH
+/// mod 角色没有这些纪元，EpochModel.Get 会抛 ArgumentException("Epoch with id 'YIGGU2_EPOCH' does not exist.")，
+/// 同样从 UpdateAfterCombatWon 冒出、中断 EndCombatInternal —— 表现是打完第 1 幕 Boss 后奖励不出现、卡死。
+/// （由 AutoSlay 自动化测试发现。）
+///
+/// 修法与上面两个一致：吞掉这个异常，只跳过「解锁纪元」这一步。
+/// 方法内部对「找不到」的情况本来就有 Log.Error 兜底，只是 EpochModel.Get 先抛了。
+/// </summary>
+[HarmonyPatch(typeof(ProgressSaveManager), "ObtainCharUnlockEpoch")]
+internal static class CharUnlockEpochPatch
+{
+	private static Exception Finalizer(Exception __exception)
+	{
+		return __exception is ArgumentException ? null : __exception;
+	}
+}

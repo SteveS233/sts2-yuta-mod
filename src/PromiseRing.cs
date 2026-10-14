@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
+using MegaCrit.Sts2.Core.Saves;
 using MegaCrit.Sts2.Core.Saves.Runs;
 
 namespace YigguMod;
@@ -26,28 +28,22 @@ namespace YigguMod;
 ///   时机用 AfterObtained：RunManager.FinalizeStartingRelics 在创建新局时
 ///   会对玩家的每个遗物调用一次（读档时不会调用，因为该方法不是幂等的）。
 ///
-/// 效果三：作为「模仿」夺取效果的持久化载体，并且**只在里香完全显现期间生效**。
-///   「模仿」斩杀敌人时夺取的正面效果要持续整局，但游戏里的能力（活力等）
-///   都是战斗内状态，战斗一结束就清空。因此需要把夺取记录存在一个
-///   能跨战斗存活、并且会写进存档的地方 —— 遗物正好满足这两点。
+/// 效果三：里香储存的「术式」（复制来的牌）的持久化载体，详见 CopiedTechniques。
+///   写法照抄官方遗物「佩尔之牙」（PaelsTooth）：
+///     · [SavedProperty] List&lt;SerializableCard&gt; —— 存档支持的类型之一，跨战斗、进存档；
+///     · AfterCloned 里必须换一个新列表，否则可变实例会和规范实例共用同一个列表；
+///     · 计数显示在遗物图标上（ShowCounter / DisplayAmount），
+///       已储存的牌名通过 StringVar「CardTitles」列在遗物描述里。
+///   只存牌的 ID（未升级、无附魔）—— 原作中复制只能拿到术式的「起点」。
 ///
-///   生效条件：
-///     · 里香完全显现时（打出「完全显现」）→ ActivateBuffs()，把记录的效果挂到玩家身上
-///     · 完全显现结束时（到期，或里香倒下）→ DeactivateBuffs()，按记录层数扣回
-///   两个方法都用 _buffsActive 做幂等保护，重复调用不会重复加/扣。
+/// 存档兼容：上一版的 [SavedProperty] StolenBuffs 已删除。读旧档时 SavedProperties.FillInternal
+/// 找不到同名属性会直接跳过（GetProperty(...)?.SetValue），不会报错，旧记录随之丢弃。
 /// </summary>
 public sealed class PromiseRing : RelicModel
 {
-	/// <summary>不同能力之间的分隔符。</summary>
-	private const char EntrySeparator = ';';
+	private const string CardTitlesVarName = "CardTitles";
 
-	/// <summary>能力 ID 与层数之间的分隔符。</summary>
-	private const char AmountSeparator = '=';
-
-	private string _stolenBuffs = string.Empty;
-
-	/// <summary>记录的效果当前是否已挂在玩家身上。仅战斗内有效，不进存档。</summary>
-	private bool _buffsActive;
+	private List<SerializableCard> _techniques = new List<SerializableCard>();
 
 	public override RelicRarity Rarity => RelicRarity.Starter;
 
@@ -57,27 +53,44 @@ public sealed class PromiseRing : RelicModel
 	/// </summary>
 	protected override string IconBaseName => "lantern";
 
-	/// <summary>
-	/// 「模仿」整局累计夺取到的正面效果，编码为 "能力ID=层数;能力ID=层数"，
-	/// 其中能力 ID 用 ModelId.ToString()（形如 power.VIGOR_POWER）。
-	/// 注意：力量不在记录范围内，由 Imitation 在夺取时就排除掉了。
-	///
-	/// 为什么用单个 string 而不是列表：SavedProperties.FromInternal 只支持
-	/// int / int[] / Enum / ModelId / bool / string / SerializableCard / List&lt;SerializableCard&gt;，
-	/// 并不支持 List&lt;string&gt;，所以列表必须自己编码。
-	/// </summary>
+	public override bool ShowCounter => base.IsMutable && _techniques.Count > 0;
+
+	public override int DisplayAmount => base.IsMutable ? _techniques.Count : 0;
+
+	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
+	{
+		new StringVar(CardTitlesVarName)
+	};
+
+	/// <summary>储存的术式，按存入顺序排列（最早的在前）。</summary>
 	[SavedProperty]
-	public string StolenBuffs
+	public List<SerializableCard> TechniqueCards
 	{
 		get
 		{
-			return _stolenBuffs;
+			return _techniques;
 		}
-		set
+		private set
 		{
 			AssertMutable();
-			_stolenBuffs = value;
+			_techniques.Clear();
+			_techniques.AddRange(value);
+			UpdateTechniqueList();
 		}
+	}
+
+	/// <summary>
+	/// 储存的术式（规范实例）。存档里出现无法识别的牌（例如来源 mod 被移除）时跳过，不会崩档。
+	/// </summary>
+	public IReadOnlyList<CardModel> StoredTechniques => _techniques
+		.Select((SerializableCard c) => SaveUtil.CardOrDeprecated(c.Id))
+		.Where((CardModel c) => !(c is DeprecatedCard))
+		.ToList();
+
+	protected override void AfterCloned()
+	{
+		base.AfterCloned();
+		_techniques = new List<SerializableCard>();
 	}
 
 	public override async Task AfterObtained()
@@ -87,162 +100,36 @@ public sealed class PromiseRing : RelicModel
 		await CardPileCmd.Add(card, PileType.Deck);
 	}
 
-	/// <summary>
-	/// 新的一场战斗开始：
-	///   1. 重置生效标记 —— 战斗结束后玩家身上的能力会被游戏清空，标记必须归零，
-	///      否则下次完全显现时 ActivateBuffs 会被幂等保护挡掉；
-	///   2. 召唤部分显现的里香。
-	/// </summary>
+	/// <summary>新的一场战斗开始：召唤部分显现的里香。</summary>
 	public override async Task BeforeCombatStart()
 	{
-		_buffsActive = false;
 		await RikaSummon.Summon(base.Owner);
 	}
 
-	/// <summary>记录的效果当前是否已挂在玩家身上（即里香正处于完全显现）。</summary>
-	public bool BuffsActive => _buffsActive;
-
-	/// <summary>记录一次夺取。同一种能力重复夺取时层数累加。</summary>
-	public void RecordStolenBuff(PowerModel power, int amount)
+	/// <summary>
+	/// 存入一项术式。已经存过的同一张牌不会重复储存，而是挪到最新的位置；
+	/// 超出上限时遗忘最早存入的一项。
+	/// </summary>
+	public void StoreTechnique(CardModel card)
 	{
-		if (amount == 0)
+		AssertMutable();
+		_techniques.RemoveAll((SerializableCard c) => c.Id == card.Id);
+		_techniques.Add(new SerializableCard { Id = card.Id });
+		while (_techniques.Count > CopiedTechniques.Capacity)
 		{
-			return;
+			_techniques.RemoveAt(0);
 		}
-		Dictionary<string, int> table = ParseStolenBuffs();
-		string key = power.Id.ToString();
-		table[key] = table.TryGetValue(key, out int existing) ? existing + amount : amount;
-		StolenBuffs = EncodeStolenBuffs(table);
+		UpdateTechniqueList();
+		Flash();
+		Log.Info($"[YigguMod] 里香吞下术式：{card.Id.Entry}（储存 {_techniques.Count}/{CopiedTechniques.Capacity}）");
 	}
 
-	/// <summary>里香登场：把记录的效果挂到玩家身上。幂等。</summary>
-	public async Task ActivateBuffs()
+	private void UpdateTechniqueList()
 	{
-		if (_buffsActive)
-		{
-			return;
-		}
-		_buffsActive = true;
-
-		Dictionary<string, int> table = ParseStolenBuffs();
-		foreach (KeyValuePair<string, int> entry in table)
-		{
-			if (entry.Value == 0)
-			{
-				continue;
-			}
-			PowerModel canonical = ResolvePower(entry.Key);
-			if (canonical == null)
-			{
-				continue;
-			}
-			// 与官方 PowerCmd.Apply<T> 一致：无参 ToMutable()，层数交给 Apply 设置。
-			// 不能写成 ToMutable(层数)：Amount 的 setter 会访问 Owner，
-			// 而克隆体尚未绑定 Owner，会抛 NullReferenceException。
-			await PowerCmd.Apply(new ThrowingPlayerChoiceContext(), canonical.ToMutable(),
-				base.Owner.Creature, entry.Value, base.Owner.Creature, null);
-		}
-	}
-
-	/// <summary>里香离去：按记录层数把效果从玩家身上扣回。幂等。</summary>
-	public async Task DeactivateBuffs()
-	{
-		if (!_buffsActive)
-		{
-			return;
-		}
-		_buffsActive = false;
-
-		if (base.Owner?.Creature == null)
-		{
-			return;
-		}
-
-		Dictionary<string, int> table = ParseStolenBuffs();
-		foreach (KeyValuePair<string, int> entry in table)
-		{
-			if (entry.Value == 0)
-			{
-				continue;
-			}
-			ModelId id;
-			try
-			{
-				id = ModelId.Deserialize(entry.Key);
-			}
-			catch
-			{
-				continue;
-			}
-			// 按 ID 找玩家身上现有的那一份，做减法而不是整体移除：
-			// 这样不会误删玩家从其他来源获得的同名能力。
-			PowerModel current = base.Owner.Creature.Powers.FirstOrDefault(p => p.Id == id);
-			if (current == null)
-			{
-				continue;
-			}
-			await PowerCmd.ModifyAmount(new ThrowingPlayerChoiceContext(), current, -entry.Value, base.Owner.Creature, null);
-		}
-	}
-
-	/// <summary>把存档里的能力 ID 解析回规范实例；无法解析时返回 null 而不是让整局崩掉。</summary>
-	private static PowerModel ResolvePower(string key)
-	{
-		ModelId id;
-		try
-		{
-			id = ModelId.Deserialize(key);
-		}
-		catch
-		{
-			return null;
-		}
-		return ModelDb.GetByIdOrNull<PowerModel>(id);
-	}
-
-	private Dictionary<string, int> ParseStolenBuffs()
-	{
-		Dictionary<string, int> table = new Dictionary<string, int>();
-		if (string.IsNullOrEmpty(_stolenBuffs))
-		{
-			return table;
-		}
-		foreach (string part in _stolenBuffs.Split(EntrySeparator))
-		{
-			if (part.Length == 0)
-			{
-				continue;
-			}
-			int separatorIndex = part.LastIndexOf(AmountSeparator);
-			if (separatorIndex <= 0)
-			{
-				continue;
-			}
-			string id = part.Substring(0, separatorIndex);
-			if (!int.TryParse(part.Substring(separatorIndex + 1), out int amount))
-			{
-				continue;
-			}
-			table[id] = table.TryGetValue(id, out int existing) ? existing + amount : amount;
-		}
-		return table;
-	}
-
-	private static string EncodeStolenBuffs(Dictionary<string, int> table)
-	{
-		StringBuilder builder = new StringBuilder();
-		foreach (KeyValuePair<string, int> entry in table)
-		{
-			if (entry.Value == 0)
-			{
-				continue;
-			}
-			if (builder.Length > 0)
-			{
-				builder.Append(EntrySeparator);
-			}
-			builder.Append(entry.Key).Append(AmountSeparator).Append(entry.Value);
-		}
-		return builder.ToString();
+		StringVar titles = (StringVar)base.DynamicVars[CardTitlesVarName];
+		titles.StringValue = _techniques.Count == 0
+			? string.Empty
+			: string.Join('\n', _techniques.Select((SerializableCard c) => "- " + SaveUtil.CardOrDeprecated(c.Id).Title));
+		InvokeDisplayAmountChanged();
 	}
 }

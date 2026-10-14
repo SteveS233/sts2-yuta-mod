@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using MegaCrit.Sts2.Core.Animation;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -46,8 +47,15 @@ public sealed class Yiggu : CharacterModel
 
 	public override RelicPoolModel RelicPool => ModelDb.RelicPool<IroncladRelicPool>();
 
-	/// <summary>初始牌组：4 张打击 + 4 张防御 + 1 张咒力强化（打击 / 防御暂用铁甲战士的基础牌）。</summary>
-	public override IEnumerable<CardModel> StartingDeck => new CardModel[]
+	/// <summary>
+	/// 初始牌组：4 张打击 + 4 张防御 + 1 张咒力强化（打击 / 防御暂用铁甲战士的基础牌）。
+	/// 自动化测试模式（--yiggu-autoslay）下额外塞入要测的牌，见 YigguAutoSlayTest。
+	/// </summary>
+	public override IEnumerable<CardModel> StartingDeck => YigguAutoSlayTest.Active
+		? BaseStartingDeck.Concat(YigguAutoSlayTest.ExtraStartingCards)
+		: BaseStartingDeck;
+
+	private static IEnumerable<CardModel> BaseStartingDeck => new CardModel[]
 	{
 		ModelDb.Card<StrikeIronclad>(),
 		ModelDb.Card<StrikeIronclad>(),

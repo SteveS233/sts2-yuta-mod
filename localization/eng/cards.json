@@ -1,6 +1,6 @@
 {
   "FULL_MANIFESTATION.title": "Full Manifestation",
-  "FULL_MANIFESTATION.description": "[gold]Rika[/gold] enters [gold]Full Manifestation[/gold] for 5 turns.",
+  "FULL_MANIFESTATION.description": "[gold]Rika[/gold] enters [gold]Full Manifestation[/gold] for 5 turns.\nIf she has stored [gold]Techniques[/gold], choose 1 to add to your [gold]hand[/gold]. It costs 0 this turn.",
   "CURSED_ENERGY_REINFORCEMENT.title": "Cursed Energy Reinforcement",
   "CURSED_ENERGY_REINFORCEMENT.description": "Gain X [gold]Strength[/gold]. Gain X [gold]Dexterity[/gold]. Gain {Block:diff()} [gold]Block[/gold].{IfUpgraded:show:\nGain X Energy.|}",
   "KNOCK_IT_DOWN.title": "Knock It Down!",
@@ -8,9 +8,9 @@
   "REVERSE_CURSED_TECHNIQUE.title": "Reverse Cursed Technique",
   "REVERSE_CURSED_TECHNIQUE.description": "Gain {RegenPower:diff()} [gold]Regeneration[/gold].",
   "IMITATION.title": "Imitation",
-  "IMITATION.description": "[gold]Rika[/gold] deals {RikaDamage:diff()} damage.\nIf [gold]Fatal[/gold], gain all buffs on the enemy (except Strength).\nStolen buffs are only active during [gold]Full Manifestation[/gold].",
+  "IMITATION.description": "[gold]Rika[/gold] deals {RikaDamage:diff()} damage.\nIf [gold]Fatal[/gold], Rika devours a [gold]Technique[/gold]: choose 1 of 3 cards from other characters to store in the [gold]Promise Ring[/gold]. Rare cards in Elite and Boss fights.",
   "BIND.title": "Bind",
   "BIND.description": "Lose {HpLoss:diff()} HP. [gold]Full Manifestation[/gold] lasts {FullManifestationPower:diff()} more turns.",
   "WHICH_ONE_YUTA.title": "Yuta, Which One?",
-  "WHICH_ONE_YUTA.description": "During [gold]Full Manifestation[/gold], at the start of each turn choose 1 of 3 cards from other characters and add it to your [gold]hand[/gold]. It costs 0 this turn.{IfUpgraded:show: Candidates are [gold]upgraded[/gold].|}"
+  "WHICH_ONE_YUTA.description": "During [gold]Full Manifestation[/gold], at the start of each turn choose 1 of 3 {IfUpgraded:show:[gold]upgraded[/gold] |}cards to add to your [gold]hand[/gold]. It costs 0 this turn.\nRika's stored [gold]Techniques[/gold] are offered first; cards from other characters fill the rest."
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
@@ -69,8 +70,8 @@ internal static class RikaSummon
 	/// <summary>
 	/// 让里香完全显现：
 	///   1. 把 FullManifestationPower 挂在她身上（持续回合 / 每回合加费 / 替乙骨承受攻击）；
-	///   2. 激活「模仿」累计夺取的效果 —— 这些效果只在完全显现期间生效，
-	///      离场时由 FullManifestationPower.AfterRemoved 收回。
+	///   2. 若她储存了术式（「模仿」吞下的牌），从中选 1 张加入手牌，本回合免费打出
+	///      —— 原作中复制来的术式只能在完全显现时使用。
 	///
 	/// 调用方（卡牌「完全显现」）已保证里香在场且尚未完全显现。
 	/// </summary>
@@ -83,10 +84,11 @@ internal static class RikaSummon
 		}
 		await PowerCmd.Apply<FullManifestationPower>(choiceContext, rika, DurationTurns, owner.Creature, source);
 
-		PromiseRing ring = owner.Relics.OfType<PromiseRing>().FirstOrDefault();
-		if (ring != null)
+		IReadOnlyList<CardModel> stored = CopiedTechniques.Stored(owner);
+		if (stored.Count > 0)
 		{
-			await ring.ActivateBuffs();
+			List<CardModel> options = CopiedTechniques.BuildOffer(owner, stored, null, CopiedTechniques.OfferCount);
+			await CopiedTechniques.OfferToHand(choiceContext, owner, options, upgrade: false);
 		}
 	}
 }

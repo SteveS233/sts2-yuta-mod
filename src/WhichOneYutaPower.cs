@@ -13,8 +13,9 @@ using MegaCrit.Sts2.Core.Saves.Runs;
 namespace YigguMod;
 
 /// <summary>
-/// 「忧太，要用哪个？」的能力实现 —— 里香完全显现时，每回合开始时从其他角色的卡池
-/// 抽 3 张让玩家选 1 张加入手牌，该牌本回合可免费打出。
+/// 「忧太，要用哪个？」的能力实现 —— 里香完全显现时，每回合开始提供 3 张候选牌，
+/// 玩家选 1 张加入手牌，该牌本回合可免费打出。
+/// 候选优先取自里香储存的术式（「模仿」吞下的牌），不足 3 张时用其他角色的牌补足。
 ///
 /// 【为什么用 AfterPlayerTurnStart 而不是 AfterEnergyReset】
 ///   两者都是回合开始时机，但 AfterPlayerTurnStart 会传入 PlayerChoiceContext，
@@ -24,12 +25,8 @@ namespace YigguMod;
 /// 【里香完全显现才触发】原作中复制来的术式只能在里香完全显现时使用。
 ///   能力本身在本场战斗内一直存在，只是触发受此条件控制。
 ///
-/// 【卡牌生成与「免费打出」】照抄官方「泼溅」（Splash）：
-///   CharacterCardPools 去掉自己的卡池 = 其他角色的卡池
-///   CardFactory.GetDistinctForCombat 抽 3 张（内部会过滤 Basic / Ancient / Event）
-///   CardCmd.Upgrade 逐个升级（仅升级版）
-///   CardSelectCmd.FromChooseACardScreen 让玩家选择
-///   SetToFreeThisTurn 标记本回合免费，再加入手牌
+/// 【卡牌生成与「免费打出」】统一走 CopiedTechniques（照抄官方「泼溅」），
+///   升级版对候选逐个 CardCmd.Upgrade。
 ///
 /// 【升级信息怎么传进来】能力与卡牌是两个独立的模型，能力无法直接知道源卡是否升级，
 ///   所以由卡牌在施加后写入 OfferUpgraded 标记。
@@ -41,7 +38,7 @@ namespace YigguMod;
 public sealed class WhichOneYutaPower : PowerModel
 {
 	/// <summary>每次提供几个候选。</summary>
-	private const int OfferCount = 3;
+	private const int OfferCount = CopiedTechniques.OfferCount;
 
 	public override PowerType Type => PowerType.Buff;
 
@@ -67,43 +64,8 @@ public sealed class WhichOneYutaPower : PowerModel
 			return;
 		}
 
-		// 「其他角色」的卡池 = 全部角色卡池去掉自己那一份。
-		List<CardPoolModel> pools = player.UnlockState.CharacterCardPools.ToList();
-		if (pools.Count > 1)
-		{
-			pools.Remove(player.Character.CardPool);
-		}
-		if (pools.Count == 0)
-		{
-			return;
-		}
-
-		IEnumerable<CardModel> candidates = pools.SelectMany(
-			(CardPoolModel pool) => pool.GetUnlockedCards(player.UnlockState, player.RunState.CardMultiplayerConstraint));
-
-		List<CardModel> options = CardFactory
-			.GetDistinctForCombat(player, candidates, OfferCount, player.RunState.Rng.CombatCardGeneration)
-			.ToList();
-		if (options.Count == 0)
-		{
-			return;
-		}
-
-		if (OfferUpgraded)
-		{
-			foreach (CardModel option in options)
-			{
-				CardCmd.Upgrade(option);
-			}
-		}
-
-		CardModel chosen = await CardSelectCmd.FromChooseACardScreen(choiceContext, options, player, canSkip: true);
-		if (chosen == null)
-		{
-			return;
-		}
-
-		chosen.SetToFreeThisTurn();
-		await CardPileCmd.AddGeneratedCardToCombat(chosen, PileType.Hand, player);
+		List<CardModel> options = CopiedTechniques.BuildOffer(
+			player, CopiedTechniques.Stored(player), CopiedTechniques.OtherCharacterCards(player), OfferCount);
+		await CopiedTechniques.OfferToHand(choiceContext, player, options, OfferUpgraded);
 	}
 }

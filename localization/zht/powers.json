@@ -2,7 +2,7 @@
   "RIKA_POWER.title": "里香",
   "RIKA_POWER.description": "乙骨的召喚物，平時以部分顯現陪在他身邊，可代他出手攻擊。\n完全顯現期間會替乙骨承受攻擊；倒下後本場戰鬥不再回來。",
   "WHICH_ONE_YUTA_POWER.title": "憂太，要用哪個？",
-  "WHICH_ONE_YUTA_POWER.description": "完全顯現期間，每回合開始時從 3 張其他角色的牌中選擇 1 張加入你的手牌，該牌在本回合可免費打出。",
+  "WHICH_ONE_YUTA_POWER.description": "完全顯現期間，每回合開始時從3張牌中選擇1張加入你的手牌，該牌在本回合可免費打出。候選優先取自里香儲存的術式，不足時用其他角色的牌補足。",
   "FULL_MANIFESTATION_POWER.title": "完全顯現",
   "FULL_MANIFESTATION_POWER.description": "每回合開始時獲得2點額外能量。\n乙骨受到的攻擊傷害改由里香承受。\n層數為剩餘的回合數，歸零後里香退回部分顯現。"
 }
