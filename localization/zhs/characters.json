@@ -1,0 +1,17 @@
+{
+  "YIGGU.title": "乙骨忧太",
+  "YIGGU.titleObject": "乙骨忧太",
+  "YIGGU.description": "特级咒术师。\n与里香一同踏入尖塔。",
+  "YIGGU.bestiaryQuote": "我还没有杀过任何人。",
+  "YIGGU.pronounObject": "他",
+  "YIGGU.pronounPossessive": "他的",
+  "YIGGU.pronounSubject": "他",
+  "YIGGU.possessiveAdjective": "他的",
+  "YIGGU.cardsModifierTitle": "乙骨忧太卡组",
+  "YIGGU.cardsModifierDescription": "乙骨忧太的卡牌会出现在奖励与商店中。",
+  "YIGGU.eventDeathPrevention": "里香还在等我。",
+  "YIGGU.goldMonologue": "[sine]这些财富，衡量不了我的咒力……[/sine]",
+  "YIGGU.aromaPrinciple": "[sine][red]这股气息……里香，你闻到了吗。[/red][/sine]",
+  "YIGGU.banter.alive.endTurnPing": "交给我。",
+  "YIGGU.banter.dead.endTurnPing": "抱歉……"
+}

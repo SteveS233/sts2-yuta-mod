@@ -1,0 +1,24 @@
+# ===== 构建产物 =====
+bin/
+obj/
+
+# ===== 由游戏本体重建出来的资源（属 MegaCrit 版权，绝不入库）=====
+# 这两个目录由 tools/make_char_assets.py 与 tools/copy_assets.py
+# 在构建时从「你本机安装的游戏」中复制素材并重写导入映射得到。
+# 它们不是本项目的原创内容，因此不纳入版本控制；
+# 任何人在自己机器上跑一次 build.ps1 就会重新生成。
+assets/
+build/
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+
+# ===== 编辑器 / 系统 =====
+.vs/
+.idea/
+*.user
+*.suo
+Thumbs.db
+desktop.ini

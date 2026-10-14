@@ -1,0 +1,16 @@
+{
+  "FULL_MANIFESTATION.title": "Full Manifestation",
+  "FULL_MANIFESTATION.description": "Fully manifest [gold]Rika[/gold] for 5 turns.",
+  "CURSED_ENERGY_REINFORCEMENT.title": "Cursed Energy Reinforcement",
+  "CURSED_ENERGY_REINFORCEMENT.description": "Gain X [gold]Strength[/gold]. Gain X [gold]Dexterity[/gold]. Gain {Block:diff()} [gold]Block[/gold].{IfUpgraded:show:\nGain X Energy.|}",
+  "KNOCK_IT_DOWN.title": "Knock It Down!",
+  "KNOCK_IT_DOWN.description": "[gold]Rika[/gold] deals {OstyDamage:diff()} damage. Apply {WeakPower:diff()} [gold]Weak[/gold].",
+  "REVERSE_CURSED_TECHNIQUE.title": "Reverse Cursed Technique",
+  "REVERSE_CURSED_TECHNIQUE.description": "Gain {RegenPower:diff()} [gold]Regeneration[/gold].",
+  "IMITATION.title": "Imitation",
+  "IMITATION.description": "[gold]Rika[/gold] deals {OstyDamage:diff()} damage.\nIf [gold]Fatal[/gold], gain all buffs on the enemy (except Strength).\nStolen buffs are only active while Rika is manifested.",
+  "BIND.title": "Bind",
+  "BIND.description": "Lose {HpLoss:diff()} HP. Increase [gold]Rika[/gold]'s manifestation by {RikaPower:diff()} turns.",
+  "WHICH_ONE_YUTA.title": "Yuta, Which One?",
+  "WHICH_ONE_YUTA.description": "While Rika is present, at the start of each turn choose 1 of 3 cards from other characters and add it to your [gold]hand[/gold]. It costs 0 this turn.{IfUpgraded:show: Candidates are [gold]upgraded[/gold].|}"
+}

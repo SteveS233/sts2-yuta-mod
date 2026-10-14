@@ -1,0 +1,17 @@
+{
+  "YIGGU.title": "Yuta",
+  "YIGGU.titleObject": "Yuta",
+  "YIGGU.description": "A special grade sorcerer.\nClimbs the Spire alongside Rika.",
+  "YIGGU.bestiaryQuote": "I have never killed anyone.",
+  "YIGGU.pronounObject": "him",
+  "YIGGU.pronounPossessive": "his",
+  "YIGGU.pronounSubject": "he",
+  "YIGGU.possessiveAdjective": "his",
+  "YIGGU.cardsModifierTitle": "Yuta Card Set",
+  "YIGGU.cardsModifierDescription": "Yuta's cards appear in rewards and shops.",
+  "YIGGU.eventDeathPrevention": "Rika is still waiting for me.",
+  "YIGGU.goldMonologue": "[sine]This gold cannot measure my cursed energy...[/sine]",
+  "YIGGU.aromaPrinciple": "[sine][red]This scent... Rika, do you smell it?[/red][/sine]",
+  "YIGGU.banter.alive.endTurnPing": "Leave it to me.",
+  "YIGGU.banter.dead.endTurnPing": "Sorry..."
+}

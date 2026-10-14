@@ -1,0 +1,496 @@
+﻿================================================================
+  乙骨 mod —— 效果修改记录
+================================================================
+
+工程目录 : E:\sljtmod\乙骨
+游戏本体 : D:\SteamLibrary\steamapps\common\Slay the Spire 2
+本体版本 : v0.111.0 (commit 41cef1ea)
+源码参考 : E:\sljtmod\sts2-master-main  （与本机本体精确对应的反编译源码）
+
+----------------------------------------------------------------
+记录规则
+----------------------------------------------------------------
+1. 每次改动 mod 的「效果」（数值、费用、触发条件、目标、
+   新增/删除卡牌遗物等），都要在下面追加一条记录。
+2. 每条记录必须包含：时间 + 改了什么 + 改之前是什么。
+3. 新记录追加在最下方（按时间正序排列）。
+4. 只改代码结构、修编译错误、调整注释这类不影响游戏表现的
+   改动，可以不记。
+
+----------------------------------------------------------------
+修改历史
+----------------------------------------------------------------
+
+[2026-10-14 12:42] 项目初始化
+  · 新建工程文件夹 E:\sljtmod\乙骨
+  · 建立本修改记录文件
+  · mod 类型定为「全新角色」（类似已装的观者 mod）
+  · 开发顺序：先做机制与效果，美术资源最后再套
+  · 尚未实现任何内容
+
+
+[2026-10-14 13:43] 乙骨忧太 角色骨架 + 初始遗物「里香」（v0.1.0，首个可用版本）
+  · 新增角色「乙骨忧太」，可在角色选择界面选取并开启新局
+      初始生命 80            （改前：无此角色）
+      初始金币 99
+      初始牌组 4 打击 + 4 防御（暂用铁甲战士的打击 / 防御）
+      每回合能量 3            （继承默认值，尚未单独设定）
+  · 新增初始遗物「里香」
+      效果（占位）：每场战斗的第一回合获得 1 点额外能量
+      —— 等同原版「灯笼」，仅用于验证「角色被动 / 初始遗物」链路，待替换
+  · 卡池 / 遗物池 / 药水池 暂全部复用铁甲战士的
+  · 外观全部复用铁甲战士（立绘、战斗动画、能量球、卡框、地图标记），美术待做
+[2026-10-14 13:52] 修复：选中乙骨忧太后开局无效（会变成故障机器人）
+  · 现象：角色选择界面能点选乙骨，但开始新局后角色是故障机器人
+  · 根因：初始遗物「里香」没有加入任何遗物池，RelicModel.Pool 查找时抛
+      InvalidOperationException: Sequence contains no matching element
+    而这条语句位于 NCharacterSelectScreen.SelectCharacter 读取遗物描述的地方，
+    排在 _lobby.SetLocalCharacter(角色) 之前 —— 异常一抛方法即中断，
+    角色从未写入 lobby，于是开局沿用了上一位已选角色（故障机器人）
+  · 修复：在 ModEntry.Initialize 中追加
+      ModHelper.AddModelToPool<IroncladRelicPool, Rika>()
+    让「里香」归属铁甲战士遗物池。其稀有度为 Starter，
+    而 RelicFactory.RollRarity 只产出 Common / Uncommon / Rare，
+    所以入池不会让里香出现在遗物奖励里
+  · 本条的数值 / 效果未做任何改动
+
+[2026-10-14 14:02] 初始遗物「里香」实装 + 新增卡牌「完全显现」
+  · 遗物「里香」效果替换
+      改前：每场战斗第一回合 +1 能量（等同原版「灯笼」的占位效果）
+      改后：开局将一张「完全显现」加入你的牌组
+  · 新增卡牌「完全显现」
+      费用 3，技能，目标自身
+      效果：召唤 100 点生命的里香（当前套用奥斯提实现）
+            里香 5 回合后消失
+            里香在场时，每回合获得 2 点额外能量
+      稀有度 Basic —— CardFactory 会过滤 Basic，故不会进入奖励 / 商店，
+      只能由遗物「里香」发放
+  · 新增能力「里香」（玩家身上的增益状态）
+      层数 = 里香剩余存在的回合数
+      每回合能量重置时：里香在场则 +2 费，随后层数 -1，归零则移除里香
+  · 占位美术
+      「完全显现」卡图复用铁甲战士「恶魔形态」
+      「里香」能力图标复制自官方「下回合能量」图标（rika_power.tres）
+
+[2026-10-14 14:13] 重构：里香相关效果全部归属到召唤物本体
+  · 卡牌「完全显现」
+      改前：3 费，描述「召唤100点生命的里香。里香会在5回合后消失。
+            里香在场时，每回合获得2点额外能量。」，无关键词
+      改后：3 费，描述「使里香完全显现5回合。」
+            新增关键词「消耗」
+            升级后新增关键词「固有」
+      卡牌自身不再携带任何数值
+  · 新增 RikaSummon：里香本体的统一定义
+      生命 100 / 持续 5 回合 / 在场时每回合 +2 费
+  · 能力「里香」改为挂在召唤物身上（原先挂在玩家身上）
+      好处：里香被击倒时效果随她一起消失，加费立刻停止，无需额外清理
+  · 数值未变：100 生命、5 回合、每回合 +2 费 均与上一版一致
+
+[2026-10-14 14:21] 「里香」改为可悬停查看效果的词条
+  · 卡牌「完全显现」描述
+      改前：使里香完全显现5回合。
+      改后：使[里香]完全显现5回合。      —— 里香用 [gold] 高亮成词条
+  · 新增词条提示：悬停卡牌即可看到里香的完整效果
+      实现方式：FullManifestation.ExtraHoverTips = HoverTipFactory.FromPower<RikaPower>()
+      与「消耗」「固有」这类关键词提示走的是同一套机制
+      （CardModel.HoverTips 汇总 ExtraHoverTips，关键词则用 HoverTipFactory.FromKeyword 自动加入）
+  · 能力「里香」的描述补全为完整效果
+      改前：里香在场时，每回合获得 2 点额外能量。层数为里香剩余存在的回合数。
+      改后：生命 100，在场时每回合获得 2 点额外能量，5 回合后消失。
+            层数为里香剩余存在的回合数。
+  · 补上繁体中文 powers.json（此前缺失，会回退到英文）
+  · 数值未变
+
+[2026-10-14 14:34] 新增初始卡牌「咒力强化」
+  · 新增卡牌「咒力强化」：X 费技能，目标自身
+      效果（严格按此顺序结算）：
+        1. 获得 X 点力量
+        2. 获得 X 点敏捷
+        3. 获得 10 点格挡
+      稀有度 Basic（CardFactory 过滤 Basic，不会进入奖励 / 商店）
+  · 初始牌组
+      改前：4 打击 + 4 防御（共 8 张）
+      改后：4 打击 + 4 防御 + 1 咒力强化（共 9 张）
+  · 顺序为何关键
+      格挡走 CreatureCmd.GainBlock → 内部 Hook.ModifyBlock，
+      而 DexterityPower.ModifyBlockAdditive 在该时刻读取的是「当前」敏捷值。
+      所以先结算敏捷，这 10 点格挡会额外吃到 X 点敏捷加成
+      （格挡的 ValueProp 必须是受加成的 Move；Unpowered 不会吃到）。
+      实际效果：投入 X 费 → 力量 +X、敏捷 +X、格挡 10+X
+  · 卡图暂时复用铁甲战士「恶魔形态」
+  · 未设定升级效果（用户未指定）
+
+[2026-10-14 14:36] 「咒力强化」新增升级效果
+  · 卡牌「咒力强化」
+      改前：无升级效果
+      改后：升级后追加「获得 X 点能量」，放在所有效果结算完之后执行
+  · 升级版完整结算顺序
+      力量 +X → 敏捷 +X → 格挡 10+X → 能量 +X
+  · 卡面文案用 {IfUpgraded:show:...|} 实现「仅升级时显示」追加那一句
+      未升级时卡面仍是三句，升级后多出第四句
+  · 未升级版本的效果完全没有改动
+  · 副作用提示：能量返还等于把投入的 X 费全额退回，
+      所以升级后的「咒力强化」实际不消耗能量（净消耗 0）
+
+[2026-10-14 14:39] 「咒力强化」添加「消耗」词条
+  · 卡牌「咒力强化」
+      改前：无关键词
+      改后：消耗（升级前后都有）
+  · 实现方式：写在 CanonicalKeywords（固有词条）里
+      升级只是叠加运行期关键词，不会移除固有词条
+      （对比「完全显现」是升级后用 AddKeyword 追加「固有」，那是叠加而非替换）
+      所以升级前后都保留「消耗」
+  · 卡面文案无需改动 —— 关键词文本由游戏自动追加到描述末尾
+  · 效果数值未变
+  · 附带影响：打出后本场战斗中移除，因此这张牌每场战斗只能用一次
+
+[2026-10-14 14:52] 新增卡池卡牌「打下来！」
+  · 新增卡牌「打下来！」：2 费攻击，目标任意敌人，稀有度 Common
+      基础：里香造成 20 点伤害，给予 1 层虚弱
+      升级：里香造成 30 点伤害，给予 2 层虚弱
+  · 伤害来源是里香本人，不是玩家 —— 靠三处保证
+      1. OstyDamageVar：官方注释写明为召唤物专用伤害变量，
+         计算伤害时以 Owner.Osty 作为来源，因此吃里香自己的力量 / 虚弱
+      2. DamageCmd.Attack(...).FromOsty(Owner.Osty, this, cardPlay)：
+         攻击者登记为里香
+      3. Osty.CheckMissingWithAnim(Owner)：里香不在场时跳过整个效果
+  · 里香不在场时的行为沿用官方惯例：跳过全部效果（含虚弱），
+    卡面泛红作为提示。官方「压扁」「骨片」等奥斯提攻击牌都是这个处理
+  · 虚弱由玩家施加（applier = Owner.Creature），与官方「扫堂腿」一致
+  · 卡图暂时复用铁甲战士「重击」
+  · 加入 IroncladCardPool（乙骨的 CardPool 当前仍指向该池）
+
+[2026-10-14 14:56] 乙骨独立卡池 + 「打下来！」改蓝卡
+  · 新增 YigguCardPool（乙骨专属卡池），Yiggu.CardPool 从 IroncladCardPool 切换过来
+      CardFrameMaterialPath = card_frame_blue（蓝色卡框）
+      EnergyColorName = ironclad（官方只有 7 套能量图标，没有乙骨的，暂用铁甲的）
+      DeckEntryCardColor = #3A6EA5，EnergyOutlineColor = #1E3A5F
+      GenerateAllCards 收录：咒力强化、完全显现、打下来！
+  · 因此「清空铁甲战士原卡池」这一步不再需要
+      铁甲战士保持完整可玩，乙骨的卡也不会漏进他的卡牌奖励 / 商店
+  · ModEntry 中的卡牌入池调用全部移除
+      卡牌归属改由 GenerateAllCards 统一提供；
+      若同时对同一个池调用 AddModelToPool，AllCards 会出现重复条目
+  · 「打下来！」稀有度 Common → Uncommon（蓝卡）
+  · 遗物池 / 药水池仍复用铁甲战士的，待乙骨自己的内容做出来后独立
+
+[2026-10-14 15:00] 更正：撤销卡框配色改动（上一轮误读了需求）
+  · 「打下来！」稀有度维持 Uncommon（游戏内显示「罕见」）
+      这一项上一轮已经改对，本次不变。
+      已核对官方语言表：RARITY_UNCOMMON = 罕见，RARITY_COMMON = 普通，RARITY_RARE = 稀有
+  · YigguCardPool 的配色回退到「建立独立卡池之前」的状态（即铁甲战士的红）：
+      CardFrameMaterialPath：card_frame_blue  → card_frame_red
+      DeckEntryCardColor   ：#3A6EA5          → #D62000
+      EnergyOutlineColor   ：#1E3A5F          → #802020
+  · 即上一轮记录里「蓝色卡框」那一部分作废
+  · 现状：稀有度是「罕见」，外观与改动前完全一致，未擅自改动任何颜色
+
+[2026-10-14 15:08] 新增卡池卡牌「反转术式」
+  · 新增卡牌「反转术式」：1 费技能，目标自身，稀有度 Uncommon（罕见）
+      基础：获得 5 层再生
+      升级：获得 7 层再生
+  · 再生使用官方 RegenPower（标题即「再生」）
+      其规则：己方回合结束时回复等同于层数的生命，然后层数 -1
+      因此 5 层的实际治疗量是 5+4+3+2+1 = 15 点，而不是每回合 5 点共 25 点
+  · 写法参照官方「再生药水」：PowerVar<RegenPower> + HoverTipFactory.FromPower<RegenPower>()
+  · 已加入 YigguCardPool.GenerateAllCards()
+  · 卡图暂时复用铁甲战士「壁垒」
+
+[2026-10-14 15:10] 「反转术式」升级效果 7 层 → 6 层
+  · 卡牌「反转术式」
+      改前：升级后获得 7 层再生（5 → 7，升级 +2）
+      改后：升级后获得 6 层再生（5 → 6，升级 +1）
+  · 基础版本不变，仍为 5 层
+  · 顺带把升级增量抽成具名常量 UpgradeRegen，避免以后再手改魔法数字
+  · 治疗量随之变化：升级版由 7+6+5+4+3+2+1 = 28 点降为 6+5+4+3+2+1 = 21 点
+
+[2026-10-14 15:18] 新增卡池卡牌「模仿」
+  · 新增卡牌「模仿」：4 费攻击，目标任意敌人，稀有度 Rare（稀有）
+      基础：里香造成 30 点伤害；斩杀时，获得该敌人身上的所有正面效果
+      升级：费用 4 → 3（伤害与效果不变）
+  · 实现要点一：必须在造成伤害之前快照敌人的正面效果
+      Creature.RemoveAllPowersAfterDeath() 会在生物死亡时清空能力，
+      斩杀判定通过后再读 Target.Powers 只会读到空。
+      官方「苦难」（Misery）同样先快照再攻击
+  · 实现要点二：复制能力用 ClonePreservingMutability()，不能用 ToMutable()
+      PowerModel.ToMutable(int) 内部有 AssertCanonical()，只能作用于规范实例；
+      敌人身上的是可变实例，直接调会抛异常
+  · 增益判定用 TypeForCurrentAmount 而非 Type（层数为负时后者不准）
+  · 斩杀判定沿用官方写法：ShouldOwnerDeathTriggerFatal() + WasTargetKilled
+  · 已加入 YigguCardPool.GenerateAllCards()
+  · 卡图暂时复用铁甲战士「进食」（同为斩杀题材）
+
+[2026-10-14 15:26] 「模仿」改为「按效果重新获得」而非复制能力实例
+  · 卡牌「模仿」夺取效果的方式变更
+      改前：用 ClonePreservingMutability() 直接克隆敌人身上那个可变实例
+      改后：快照只记录「能力 ID + 层数」这组值，结算时用 ModelDb.GetById 取回该能力的
+            规范定义，再 ToMutable(层数) 生成全新实例挂到玩家身上
+  · 动机：克隆实例会把指向原主人的运行期状态一并带过来
+      （部分能力内部记录目标玩家、累计计数等字段，直接克隆行为不可预期）
+      按效果重新获得只保留「效果本身」，行为可预期
+  · 代价：会丢失原实例的临时状态 —— 这是有意取舍
+  · 卡牌的费用 / 伤害 / 稀有度 / 触发条件均未变
+
+
+[2026-10-14 15:40] 根因查明：进入商店黑屏卡死（不是事件房间）
+  · 现象：进入问号/商店房间时黑屏卡死
+  · 日志证据（godot.log 第 613 行）
+      System.InvalidOperationException: Can't generate valid rarity for merchant
+      card type Skill with card options:
+      调用栈：CardFactory.CreateForMerchant -> MerchantCardEntry.Populate
+              -> MerchantInventory.PopulateCharacterCardEntries
+              -> MerchantRoom.EnterInternal
+  · 根因：乙骨卡池太小，填不满商店的卡位
+      MerchantInventory 固定要开 5 个角色卡位：
+        Attack, Attack, Skill, Skill, Power
+      每个卡位 Populate 时会用 _cardPool.Except(已生成的卡) 剔除已用过的牌。
+      当前池内非 Basic 的牌只有 3 张：2 攻击 + 1 技能 + 0 能力，于是：
+        卡位1(攻击) 用掉 1 张攻击
+        卡位2(攻击) 用掉另 1 张攻击
+        卡位3(技能) 用掉唯一的技能牌
+        卡位4(技能) 剩余为空 -> 抛异常   ← 与日志完全吻合
+  · 结论：不是事件的问题，是商店；但「卡池太少」这个方向判断正确
+  · 解除条件：卡池至少要有
+      非 Basic 攻击牌 x2（现有 2，已满足）
+      非 Basic 技能牌 x2（现有 1，缺 1）
+      非 Basic 能力牌 x1（现有 0，缺 1）
+  · 附注：卡牌奖励不会因此崩溃
+      CreateForReward 的允许稀有度由当前池子实际内容推导，
+      再配合 GetNextAllowedRarity 的向上取整 + 环绕，只要还有任意非 Basic 牌就能兜住
+  · 本条为根因诊断，未改动任何游戏数值
+
+
+[2026-10-14 15:48] 临时塞入 5 张占位卡，解除商店黑屏
+  · 为满足商店的卡位硬性要求，向 YigguCardPool 临时借入 5 张铁甲战士的牌
+      Anger        攻击 / 普通
+      BodySlam     攻击 / 普通
+      ShrugItOff   技能 / 普通
+      TrueGrit     技能 / 普通
+      Inflame      能力 / 罕见
+    特意选普通/罕见稀有度，顺便补上乙骨卡池原本「一张普通牌都没有」的空缺
+  · 借入后卡池的非 Basic 分布（商店需要 攻击≥2 技能≥2 能力≥1）
+      攻击 4：KnockItDown, Imitation, Anger, BodySlam
+      技能 3：ReverseCursedTechnique, ShrugItOff, TrueGrit
+      能力 1：Inflame
+    已通过读取各卡构造参数逐一核对类型与稀有度
+  · 代码里该区块用 TODO 标注，等乙骨自己的卡够了之后整块删除
+  · 注意：占位期间这 5 张铁甲牌也会出现在乙骨的卡牌奖励与商店里
+  · 乙骨自己的卡：数值与效果均未改动
+
+
+[2026-10-14 15:43] 「模仿」夺取效果从「本场战斗」升级为「整局游戏持续」
+  · 卡牌「模仿」
+      改前：斩杀时，获得该敌人身上的所有正面效果（仅本场战斗有效）
+      改后：斩杀时，本局游戏中获得该敌人身上的所有正面效果
+  · 实现难点：游戏里的能力（力量、活力等）都是战斗内状态，战斗结束即清空，
+    所以「整局持续」必须把夺取记录存到能跨战斗存活的地方，每次战斗重新挂载
+  · 实现方式
+      1. 遗物「里香」新增 [SavedProperty] string StolenBuffs，
+         编码为 "能力ID=层数;能力ID=层数"（能力 ID 用 ModelId.ToString()）
+      2. 模仿斩杀时：当场挂一份 + 调用 Rika.RecordStolenBuff 记录（同能力累加层数）
+      3. 里香新增 BeforeCombatStart()：每场战斗开始时把累计效果重新挂到玩家身上
+         时序与官方「金刚杵」（开局+1力量）、「赤牛」（+活力）完全一致
+  · 为什么用单个 string 而不是列表
+      SavedProperties.FromInternal 只支持 int / int[] / Enum / ModelId / bool /
+      string / SerializableCard / List<SerializableCard>，不支持 List<string>
+  · 已验证：SerializableRelic.Props 就是 SavedProperties，遗物的 SavedProperty
+    会写进存档，因此退出重进后累计效果仍然保留
+  · 已知边界
+      a) 记录挂在「里香」遗物上；若该遗物被事件移除，累计效果会一并丢失
+      b) 存档中出现无法解析的能力 ID（例如来源 mod 被移除）时跳过，不会崩档
+      c) 语义从「本场」变成「整局」后强度大幅提升，且同一能力可跨战斗累加
+  · 卡牌的费用 / 伤害 / 稀有度均未变
+
+
+[2026-10-14 16:05] 修复两个 bug：精英战后卡住 + 「模仿」打出时空引用
+  · Bug 1：击败精英后战后奖励不出现、游戏卡住（需重进才能恢复）
+      日志证据
+        System.ArgumentOutOfRangeException: (Parameter 'character')
+        Actual value was CHARACTER.YIGGU
+        at ProgressSaveManager.CheckFifteenElitesDefeatedEpoch
+        at ProgressSaveManager.UpdateAfterCombatWon
+        at CombatManager.EndCombatInternal
+      根因：该方法内部是一串硬编码的类型判断
+        if (!(character is Ironclad)) ... if (!(character is Deprived))
+          throw new ArgumentOutOfRangeException("character", ...)
+        任何 mod 角色都会命中最后的 throw。异常从 UpdateAfterCombatWon 冒出，
+        中断 EndCombatInternal，于是战后奖励流程永远走不完。
+        —— 这是所有 mod 角色的通病，与乙骨的具体实现无关。
+      修复：对 CheckFifteenElitesDefeatedEpoch 与 CheckFifteenBossesDefeatedEpoch
+            各挂一个 Harmony Finalizer，吞掉这个 ArgumentOutOfRangeException。
+            被跳过的只是「给该角色解锁对应纪元」这一步（本来也不存在乙骨的纪元），
+            调用方 UpdateAfterCombatWon 能正常走完。
+  · Bug 2：「模仿」打出时报空引用（夺取效果实际从未生效过）
+      日志证据
+        PlayCardAction card: CARD.IMITATION completed with exception: NullReferenceException
+        at PowerModel.ToMutable(Int32 initialAmount)
+        at YigguMod.Imitation.OnPlay(...)
+      根因（我的实现错误）：给 ToMutable 传了层数。
+        PowerModel.Amount 的 setter 会走 SetAmount -> 访问 Owner，
+        而刚克隆出来的实例还没绑定 Owner，传非 0 层数直接空引用。
+        官方 PowerCmd.Apply<T> 的写法是「无参 ToMutable() + 由 Apply 设置层数」，
+        层数在 ApplyInternal 里是在 Owner 赋值之后才设置的，顺序才是安全的。
+      修复：Imitation 与 Rika.BeforeCombatStart 两处都改为 canonical.ToMutable()，
+            层数交给 PowerCmd.Apply 的参数传入。
+  · 顺带排查了其他「硬编码角色类型」的位置（按 is Necrobinder 全库搜索）
+      其余 7 处都有安全兜底、不会抛异常：
+        NMapPointHistoryEntry.GetSmallHitSfx -> 返回空列表
+        YummyCookie -> 回退到铁甲战士的贴图名
+        NVoidFormVfx 等形态特效 -> 只是不设置骨骼名（视觉可能不准，不崩）
+        Necrobinder.GetSummonAnimIfApplicable -> 回退 "Attack"
+        ProgressSaveManager 第 365/395 行的三元链 -> 兜底 null
+      结论：会抛异常的只有已修复的那两处
+  · 卡牌与遗物的数值 / 效果均未改动
+
+
+[2026-10-14 16:06] 「模仿」两处完善：力量不夺取 + 效果仅在里香显现期间生效
+  · 改动一：力量不再夺取（连当场也不给）
+      夺取时过滤掉 StrengthPower，卡面文字同步注明「力量除外」
+      动机：力量跨战斗累加会滚雪球
+  · 改动二：记录效果的生效条件改为「里香在场」
+      改前：每场战斗开始时无条件把全部记录效果挂到玩家身上
+      改后：里香登场（打出「完全显现」）时激活；她离场时收回
+      由 Rika.ActivateBuffs / Rika.DeactivateBuffs 完成，用 _buffsActive 做幂等保护
+  · 为什么不再在战斗开始时挂上：里香是打出「完全显现」才登场的，
+    战斗开始时她并不在场，按需求那时不该有效果
+  · 「里香离场」的检测点用 RikaPower.AfterRemoved
+      CreatureCmd 的死亡流程会执行 creature.RemoveAllPowersAfterDeath()，
+      然后逐个 await item.AfterRemoved(creature)，
+      所以无论她是被打死，还是 5 回合到期被 AfterEnergyReset 主动击杀，都会走到这里
+  · 收回时按记录层数做减法（PowerCmd.ModifyAmount 传负数），而不是整体移除，
+    避免误删玩家从其他来源获得的同名能力
+  · 已知边界：若某个能力在里香离场前已因回合衰减少于记录层数，
+    这次减法会把它直接清零；属于可接受的近似
+  · 卡牌的费用 / 伤害 / 稀有度均未改动
+
+
+[2026-10-14 16:12] 新增卡池卡牌「束缚」+ 统一「里香不在场不可打出」的行为
+  · 新增卡牌「束缚」：0 费技能，目标自身，稀有度 Common（普通）
+      基础：失去 10 点生命，使里香在场层数 +3
+      升级：失去 10 点生命，使里香在场层数 +5
+      「在场层数」即 RikaPower 的层数 = 里香剩余存在的回合数，
+      等价于「以 10 点生命换取里香多存在 3 个回合」
+  · 失去生命的写法照抄官方「放血」：HpLossVar + CreatureCmd.Damage 配
+    Unblockable | Unpowered | Move，并播 vfx_bloody_impact
+  · 延长时长用 PowerCmd.Apply<RikaPower>，因为其 StackType 为 Counter，
+    对已存在的实例会自动走层数叠加
+  · 行为统一：新增 IsPlayable => !Owner.IsOstyMissing
+      原本「打下来！」与「模仿」只在里香不在场时泛红提示，但仍然可以打出，
+      等于白白浪费一张牌和费用。官方「击掌」（HighFive）的做法是直接禁止打出，
+      现在三张依赖里香的牌（打下来！/模仿/束缚）统一为不可打出
+      IsPlayable 是 CardModel 的 protected virtual 属性，
+      CanPlay() 会据此返回 UnplayableReason.BlockedByCardLogic
+      各卡 OnPlay 里的 CheckMissingWithAnim 作为兜底保留（卡牌可能被效果强制打出）
+  · 已加入 YigguCardPool.GenerateAllCards()
+  · 卡池非 Basic 分布（商店需要 攻击≥2 技能≥2 能力≥1）
+      攻击 4：KnockItDown, Imitation, Anger, BodySlam
+      技能 4：ReverseCursedTechnique, ShrugItOff, TrueGrit, Bind
+      能力 1：Inflame
+  · 卡图暂时复用铁甲战士「放血」（同为以生命换收益）
+
+
+[2026-10-14 16:20] 「完全显现」：加前置条件 + 去掉消耗词条
+  · 改动一：前置条件「里香不在场时才可打出」
+      实现：IsPlayable => base.Owner.IsOstyMissing
+      注意极性与另外三张相反 —— 打下来！/模仿/束缚 需要里香在场，
+      而这张牌是「召唤她」，她已在场自然无需再召唤
+      效果：里香在场时该卡在手上直接灰掉、不可打出，不会白费 3 费
+  · 改动二：移除「消耗」词条
+      原先写在 CanonicalKeywords 里，现已删除该覆写，本卡不再有固有词条
+      升级仍靠 OnUpgrade 里的 AddKeyword(Innate) 追加「固有」
+      （CanonicalKeywords 是固有词条，升级只做叠加不会移除，两者互不影响）
+      关键词文本由游戏自动追加到描述末尾，所以语言表无需改动
+  · 现状（四张与里香相关的牌的打牌条件）
+      完全显现  里香不在场时可打出（升级后固有）
+      打下来！  里香在场时可打出
+      模仿      里香在场时可打出
+      束缚      里香在场时可打出
+  · 卡牌费用 / 效果数值 / 稀有度均未改动
+
+
+[2026-10-14 17:06] 新增能力牌「忧太，要用哪个？」
+  · 新增卡牌「忧太，要用哪个？」：2 费能力牌，目标自身，稀有度 Rare（稀有）
+      基础：里香在场时，每回合开始从 3 张其他角色的牌中选 1 张加入手牌，该牌本回合免费打出
+      升级：提供的候选牌为「升级过的」
+  · 新增能力 WhichOneYutaPower 承载每回合的行为
+  · 关键实现点一：钩子选 AfterPlayerTurnStart(PlayerChoiceContext, Player)
+      它同时满足两个需求 —— 回合开始的时机，以及「让玩家三选一」所需的 choiceContext。
+      官方「交易工具」（ToolsOfTheTradePower）同为每回合开始让玩家选牌，用的正是这个钩子
+      （对比 AfterEnergyReset 没有 context，做不了选择界面）
+  · 关键实现点二：卡牌生成与免费打出照抄官方「泼溅」（Splash）
+      Owner.UnlockState.CharacterCardPools 去掉自己的卡池 = 其他角色的卡池
+      CardFactory.GetDistinctForCombat 抽 3 张（内部会过滤 Basic / Ancient / Event）
+      CardCmd.Upgrade 逐个升级（仅升级版）
+      CardSelectCmd.FromChooseACardScreen 让玩家选择
+      SetToFreeThisTurn 标记本回合免费，再加入手牌
+  · 关键实现点三：升级信息如何从卡牌传给能力
+      能力与卡牌是两个独立模型，能力无从得知源卡是否升级。
+      利用 PowerCmd.Apply<T> 会返回实际生效的能力实例，在卡牌里拿到后写入 OfferUpgraded 标记
+  · 卡池非 Basic 分布（商店需要 攻击≥2 技能≥2 能力≥1）
+      攻击 4：KnockItDown, Imitation, Anger, BodySlam
+      技能 4：ReverseCursedTechnique, ShrugItOff, TrueGrit, Bind
+      能力 2：WhichOneYuta, Inflame
+      这是乙骨第一张真正属于自己的能力牌
+  · 里香不在场时该能力不触发；她若重新登场，能力会自动恢复工作
+    （能力本身在本场战斗内持续存在，只是触发条件受里香在场与否控制）
+  · 卡图暂时复用铁甲战士「恶魔形态」
+    能力图标由 tools/copy_assets.py 从官方「交易工具」图标复制为 which_one_yuta_power.tres
+
+
+[2026-10-14 17:20] 移除 5 张临时占位卡，乙骨卡池只剩自己的牌
+  · 删除的占位卡（全部借自铁甲战士卡池）
+      Anger        攻击 / 普通
+      BodySlam     攻击 / 普通
+      ShrugItOff   技能 / 普通
+      TrueGrit     技能 / 普通
+      Inflame      能力 / 罕见
+  · 删除前先做了商店下限校验，确认删除后仍然满足（这一步不可省）
+      非 Basic 攻击：KnockItDown(罕见)、Imitation(稀有)        = 2  ≥2 ✓
+      非 Basic 技能：ReverseCursedTechnique(罕见)、Bind(普通)  = 2  ≥2 ✓
+      非 Basic 能力：WhichOneYuta(稀有)                        = 1  ≥1 ✓
+    —— 刚好卡在下限上，这 5 张里任何一张都不能再删
+  · 已把「当前正好是下限」和完整清单写进 YigguCardPool 的类注释，
+    以后删改卡牌前可直接对照，不必重新翻商店源码
+  · 副作用（预期）：乙骨的卡牌奖励 / 商店不再出现这 5 张铁甲牌
+  · 乙骨自己的 7 张卡：数值与效果均未改动
+
+
+[2026-10-14 17:32] 「模仿」不再记录「寄生物」增益
+  · 定位过程
+      中文语言表 zhs_powers.json 中「寄生物」对应 INFESTED_POWER
+      zhs_monsters.json 中「异蛙寄生虫」对应 PHROG_PARASITE
+      PhrogParasite.cs 第 36 行确认它会给自身施加
+        PowerCmd.Apply<InfestedPower>(ctx, base.Creature, 4m, ...)
+      InfestedPower 声明为 public sealed 且 Type => PowerType.Buff，
+      因此确实落在「所有正面效果」的夺取范围内 —— 问题属实
+  · 修改内容
+      把「是否可夺取」的判定抽成 Imitation.IsStealable 一个集中的静态方法，
+      目前排除两项：StrengthPower（力量）、InfestedPower（寄生物）
+      以后还要排除别的能力，往那个方法里加一行即可，不必再改过滤表达式
+  · 卡面文字未改动，仍是「获得该敌人身上的所有正面效果（力量除外）」
+      有意如此：寄生物这条属于「别让玩家拿到这个坏东西」的修正，
+      不适合写进卡面展示。若希望卡面也注明，改成「（力量、寄生物除外）」即可
+  · 卡牌费用 / 伤害 / 稀有度 / 触发条件均未改动
+
+
+[2026-10-14 17:45] （待定议题，非改动）「模仿」斩杀收益的设计讨论
+  · 用户提出：有特殊 buff 的敌人太少，希望每次斩杀都有不同收益
+  · 诊断（若以后重启此议题，直接从这三条结论开始）
+      1. 根本问题不是「收益不够」，而是触发与否取决于玩家无法控制的事实
+         （那个敌人恰好有没有 buff），属于触发条件与玩家决策脱钩
+      2. 目前夺取是静默的，没有提示与特效，玩家感知不到 ——
+         即使机制改对了，不加可见反馈也白搭。这一条独立于机制改动，值得单做
+      3. 「每次都有收益」与现有的跨战斗累积框架正面冲突：
+         累积速度会暴涨，正是当初排除力量的原因。
+         必须先决定防滚雪球方案：收益不累积 / 设总量上限 / 高收益只首次给
+  · 已确认的可用素材（不必重新调研）
+      PowerType.Buff 的能力共 200 个，取材充足
+      RoomType 现成提供 Monster / Elite / Boss 三档，可用于按敌人强度分档
+      CombatManager.Instance.History.Entries 可读敌人本回合行为
+      （含 CreatureAttackedEntry 等），方案「按行为给收益」可行
+  · 两个实现硬约束
+      1. 随机必须用游戏自身的种子随机源（player.RunState.Rng.*），
+         不可用 System.Random —— 多人联机下非确定性随机会导致状态分歧
+      2. 判断精英/Boss 要用房间类型而非地图点类型（RoomType vs MapPointType），
+         源码注释专门警告过二者会不一致（例如在 ? 事件里选择开战）
+  · 结论：用户决定先行搁置，改日再议。本条不涉及任何代码改动

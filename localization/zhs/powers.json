@@ -1,0 +1,6 @@
+{
+  "RIKA_POWER.title": "里香",
+  "RIKA_POWER.description": "生命 100，在场时每回合获得 2 点额外能量，5 回合后消失。\n层数为里香剩余存在的回合数。",
+  "WHICH_ONE_YUTA_POWER.title": "忧太，要用哪个？",
+  "WHICH_ONE_YUTA_POWER.description": "里香在场时，每回合开始时从 3 张其他角色的牌中选择 1 张加入你的手牌，该牌在本回合可免费打出。"
+}

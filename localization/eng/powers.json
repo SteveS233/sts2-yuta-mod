@@ -1,0 +1,6 @@
+{
+  "RIKA_POWER.title": "Rika",
+  "RIKA_POWER.description": "100 HP. While present, gain 2 additional Energy each turn. Vanishes after 5 turns.\nThe amount is the number of turns Rika remains.",
+  "WHICH_ONE_YUTA_POWER.title": "Yuta, Which One?",
+  "WHICH_ONE_YUTA_POWER.description": "While Rika is present, at the start of each turn choose 1 of 3 cards from other characters and add it to your hand. It costs 0 that turn."
+}

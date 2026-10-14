@@ -1,0 +1,12 @@
+{
+  "id": "YigguMod",
+  "name": "乙骨忧太",
+  "author": "you",
+  "description": "Adds Yuta Okkotsu as a playable character (80 HP, 4 Strikes + 4 Defends) with the starting relic Rika.\n\n新增可玩角色「乙骨忧太」：80 生命，初始牌组 4 打击 + 4 防御，初始遗物「里香」。",
+  "version": "0.1.0",
+  "has_pck": true,
+  "has_dll": true,
+  "dependencies": [],
+  "affects_gameplay": true,
+  "min_game_version": "0.111.0"
+}
