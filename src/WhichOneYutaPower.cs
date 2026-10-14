@@ -63,8 +63,10 @@ public sealed class WhichOneYutaPower : PowerModel
 			return;
 		}
 
+		// 储存的术式全部列出；不足 3 张时用其他角色的牌补到 3 张。
+		IReadOnlyList<CardModel> stored = CopiedTechniques.Stored(player);
 		List<CardModel> options = CopiedTechniques.BuildOffer(
-			player, CopiedTechniques.Stored(player), CopiedTechniques.OtherCharacterCards(player), OfferCount);
+			player, stored, CopiedTechniques.OtherCharacterCards(player), System.Math.Max(OfferCount, stored.Count));
 		await CopiedTechniques.OfferToHand(choiceContext, player, options, OfferUpgraded);
 	}
 }

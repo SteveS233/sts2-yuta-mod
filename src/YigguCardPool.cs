@@ -103,6 +103,9 @@ public sealed class YigguCardPool : CardPoolModel
 		ModelDb.Card<AuthenticMutualLove>(),   // 技能
 		ModelDb.Card<WhichOneYuta>(),          // 能力
 		ModelDb.Card<QueenOfCurses>(),         // 能力
-		ModelDb.Card<TechniqueRelease>()       // 攻击
+		ModelDb.Card<TechniqueRelease>(),      // 攻击
+
+		// ===== 先古（只能从遗物「积灰的典籍」获得；没有它，先古之民达弗的事件会卡死）=====
+		ModelDb.Card<TogetherWithRika>()       // 能力
 	};
 }

@@ -139,7 +139,7 @@ public sealed class InumakiMegaphone : RelicModel
 }
 
 /// <summary>
-/// 咒力刀 —— 罕见。完全显现期间，乙骨的攻击每段额外造成 3 点伤害。
+/// 咒力刀 —— 罕见。完全显现期间，乙骨的攻击每段额外造成 2 点伤害。
 ///
 /// 原作：乙骨以咒力强化刀身；完全显现时里香是近乎无限的咒力库。
 /// 只作用于乙骨本人的攻击（dealer 是乙骨）。图标借用「翡翠之剑」。
@@ -150,9 +150,10 @@ public sealed class CursedKatana : RelicModel
 
 	protected override string IconBaseName => "sword_of_jade";
 
+	/// <summary>每段 +2（平衡：原 +3，与连斩 / 术式解放等多段攻击叠加过强）。</summary>
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
-		new DamageVar(3m, ValueProp.Move)
+		new DamageVar(2m, ValueProp.Move)
 	};
 
 	public override decimal ModifyDamageAdditive(Creature target, decimal amount, ValueProp props, Creature dealer, CardModel cardSource, CardPlay cardPlay)
@@ -210,14 +211,12 @@ public sealed class RikasPhoto : RelicModel
 		{
 			return;
 		}
-		IReadOnlyList<CardModel> stored = CopiedTechniques.Stored(player);
-		if (stored.Count == 0)
+		if (CopiedTechniques.Stored(player).Count == 0)
 		{
 			return;
 		}
 		Flash();
-		List<CardModel> options = CopiedTechniques.BuildOffer(player, stored, null, CopiedTechniques.OfferCount);
-		await CopiedTechniques.OfferToHand(choiceContext, player, options, upgrade: false);
+		await CopiedTechniques.OfferStoredToHand(choiceContext, player);
 	}
 }
 

@@ -14,7 +14,7 @@ namespace YigguMod;
 
 /// <summary>
 /// 里香之爪 —— 1 费攻击。稀有度：普通。
-///   里香造成 8 点伤害。升级后 11 点。
+///   里香造成 7 点伤害。升级后 10 点。（对照奥斯提「啪」1 费 7 点）
 ///
 /// 最基础的里香攻击牌：部分显现即可打出，伤害来源是她本人（RikaDamageVar + FromRika），
 /// 写法与「打下来！」一致。
@@ -23,7 +23,7 @@ namespace YigguMod;
 /// </summary>
 public sealed class RikaClaw : CardModel
 {
-	private const decimal BaseDamage = 8m;
+	private const decimal BaseDamage = 7m;
 
 	public RikaClaw()
 		: base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
@@ -63,6 +63,6 @@ public sealed class RikaClaw : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(3m); // 8 → 11
+		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(3m); // 7 → 10
 	}
 }

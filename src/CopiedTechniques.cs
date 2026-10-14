@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 
 namespace YigguMod;
@@ -107,6 +109,38 @@ internal static class CopiedTechniques
 		}
 	}
 
+	/// <summary>
+	/// 从里香储存的术式中选 1 张加入手牌，本回合免费打出（完全显现、领域展开、里香的照片共用）。
+	/// 储存的术式全部列出供选择（最多 Capacity 张），而不是随机抽 3 张 ——
+	/// 超过 3 张时用网格选择界面（见 ChooseOne）。没有储存时什么都不做。
+	/// </summary>
+	public static async Task OfferStoredToHand(PlayerChoiceContext choiceContext, Player player)
+	{
+		IReadOnlyList<CardModel> stored = Stored(player);
+		if (stored.Count == 0)
+		{
+			return;
+		}
+		List<CardModel> options = BuildOffer(player, stored, null, stored.Count);
+		await OfferToHand(choiceContext, player, options, upgrade: false);
+	}
+
+	/// <summary>
+	/// 让玩家从候选中选 1 张（可跳过）。
+	/// 官方的三选一界面 FromChooseACardScreen 硬性限制最多 3 张（多了直接抛 ArgumentException），
+	/// 所以超过 3 张时改用网格选择界面 FromSimpleGrid（官方遗物「选择悖论」同款），
+	/// 最少 0 张、最多 1 张 —— 需要手动确认，不选直接确认即为跳过。
+	/// </summary>
+	private static async Task<CardModel> ChooseOne(PlayerChoiceContext choiceContext, Player player, List<CardModel> options)
+	{
+		if (options.Count <= 3)
+		{
+			return await CardSelectCmd.FromChooseACardScreen(choiceContext, options, player, canSkip: true);
+		}
+		CardSelectorPrefs prefs = new CardSelectorPrefs(new LocString("relics", "PROMISE_RING.selectionScreenPrompt"), 0, 1);
+		return (await CardSelectCmd.FromSimpleGrid(choiceContext, options, player, prefs)).FirstOrDefault();
+	}
+
 	/// <summary>让玩家从候选中选 1 张加入手牌，本回合免费打出。可以跳过。</summary>
 	public static async Task OfferToHand(PlayerChoiceContext choiceContext, Player player, List<CardModel> options, bool upgrade)
 	{
@@ -125,7 +159,7 @@ internal static class CopiedTechniques
 			}
 		}
 
-		CardModel chosen = await CardSelectCmd.FromChooseACardScreen(choiceContext, options, player, canSkip: true);
+		CardModel chosen = await ChooseOne(choiceContext, player, options);
 		if (chosen == null)
 		{
 			return;

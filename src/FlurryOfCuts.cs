@@ -14,7 +14,7 @@ namespace YigguMod;
 
 /// <summary>
 /// 连斩 —— 1 费攻击。稀有度：罕见。
-///   造成 4 点伤害 3 次；完全显现期间改为 4 次。升级后每次 5 点。
+///   造成 3 点伤害 3 次；完全显现期间改为 4 次。升级后每次 4 点。
 ///
 /// 乙骨本人的多段攻击（FromCard + WithHitCount），每段都吃力量 —— 与「咒力强化」配合。
 ///
@@ -31,7 +31,7 @@ public sealed class FlurryOfCuts : CardModel
 
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
-		new DamageVar(4m, ValueProp.Move)
+		new DamageVar(3m, ValueProp.Move)
 	};
 
 	protected override IEnumerable<IHoverTip> ExtraHoverTips => new IHoverTip[]
@@ -57,6 +57,6 @@ public sealed class FlurryOfCuts : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars.Damage.UpgradeValueBy(1m); // 4 → 5
+		base.DynamicVars.Damage.UpgradeValueBy(1m); // 3 → 4
 	}
 }

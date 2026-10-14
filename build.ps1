@@ -79,7 +79,8 @@ if (-not $SkipAssets) {
     'images/powers/demon_form_power.png'         'images/powers/domain_power.png' `
     'images/powers/tools_of_the_trade_power.png' 'images/powers/which_one_yuta_power.png' `
     'images/powers/barricade_power.png'          'images/powers/until_death_power.png' `
-    'images/powers/juggernaut_power.png'         'images/powers/queen_of_curses_power.png'
+    'images/powers/juggernaut_power.png'         'images/powers/queen_of_curses_power.png' `
+    'images/powers/rage_power.png'               'images/powers/together_with_rika_power.png'
   if ($LASTEXITCODE -ne 0) { throw '占位能力图标复制失败' }
 }
 if (-not (Test-Path -LiteralPath $assets)) { throw "缺少资源目录: $assets" }

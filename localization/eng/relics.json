@@ -23,5 +23,6 @@
   "RIKAS_PHOTO.flavor": "Taken six years ago. In it she is still the girl who promised to marry him.",
   "YAGAS_CURSED_CORPSE.title": "Yaga's Cursed Corpse",
   "YAGAS_CURSED_CORPSE.description": "Whenever [gold]Rika[/gold] takes attack damage, gain [blue]{Block}[/blue] [gold]Block[/gold].",
-  "YAGAS_CURSED_CORPSE.flavor": "Made by Principal Yaga himself. Rumor has it that it moves on its own."
+  "YAGAS_CURSED_CORPSE.flavor": "Made by Principal Yaga himself. Rumor has it that it moves on its own.",
+  "PROMISE_RING.selectionScreenPrompt": "Choose a Technique to add to your hand"
 }

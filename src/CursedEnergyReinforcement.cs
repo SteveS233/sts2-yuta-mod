@@ -15,7 +15,7 @@ namespace YigguMod;
 /// <summary>
 /// 咒力强化 —— X 费技能，消耗。
 ///   基础：获得 X 点力量，获得 X 点敏捷，获得 10 点格挡。
-///   升级：在上述效果全部结算完之后，再获得 X 点能量。
+///   升级：力量 / 敏捷改为 X+1 点。（改前升级是「最后返还 X 点能量」，等于整张牌免费，过强）
 ///
 /// 消耗写在 CanonicalKeywords 里。CanonicalKeywords 表示这张牌**固有**的关键词，
 /// 升级只是叠加运行期关键词（见「完全显现」升级加固有），不会移除固有词条，
@@ -26,12 +26,11 @@ namespace YigguMod;
 ///   （构造里 Canonical = CostsX ? 0 : canonicalCost），
 ///   所以构造函数传的费用只是占位值，与旋风斩等官方 X 费卡一致传 0。
 ///
-/// 【效果顺序是关键】严格为：力量 → 敏捷 → 格挡 →（升级）能量。原因：
+/// 【效果顺序是关键】严格为：力量 → 敏捷 → 格挡。原因：
 ///   1. 格挡走 CreatureCmd.GainBlock，其内部会调用 Hook.ModifyBlock，
 ///      而 DexterityPower.ModifyBlockAdditive 在那个时刻读取的是**当前**敏捷值。
 ///      所以先结算敏捷，这 10 点格挡才能吃到本张牌给的 X 点敏捷加成
 ///      （格挡的 ValueProp 必须是受加成的 Move；Unpowered 不会吃到敏捷）。
-///   2. 升级的能量返还放在最后，是在其他效果都结算完之后才执行。
 ///
 /// 稀有度设为 Basic：CardFactory 会过滤 Basic，因此不会进入卡牌奖励 / 商店，
 /// 只作为初始牌组的成员存在。
@@ -70,24 +69,20 @@ public sealed class CursedEnergyReinforcement : CardModel
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		// X 是打出时实际投入的能量，只解析一次，后续步骤共用同一个值。
+		// 升级后按 X+1 结算（平衡：原先升级是「返还 X 点能量」，等于整张牌免费）。
 		int x = ResolveEnergyXValue();
+		int amount = base.IsUpgraded ? x + 1 : x;
 
 		// 第一步：力量
 		// 第二步：敏捷
-		if (x > 0)
+		if (amount > 0)
 		{
-			await PowerCmd.Apply<StrengthPower>(choiceContext, base.Owner.Creature, x, base.Owner.Creature, this);
-			await PowerCmd.Apply<DexterityPower>(choiceContext, base.Owner.Creature, x, base.Owner.Creature, this);
+			await PowerCmd.Apply<StrengthPower>(choiceContext, base.Owner.Creature, amount, base.Owner.Creature, this);
+			await PowerCmd.Apply<DexterityPower>(choiceContext, base.Owner.Creature, amount, base.Owner.Creature, this);
 		}
 
-		// 第三步：格挡。放在敏捷之后，因此会吃到刚获得的 X 点敏捷。
+		// 第三步：格挡。放在敏捷之后，因此会吃到刚获得的敏捷。
 		await CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);
-
-		// 第四步（仅升级后）：获得 X 点能量。必须放在所有效果之后。
-		if (base.IsUpgraded && x > 0)
-		{
-			await PlayerCmd.GainEnergy(x, base.Owner);
-		}
 	}
 
 	// 暂时复用铁甲战士「恶魔形态」的卡图。

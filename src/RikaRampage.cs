@@ -15,7 +15,7 @@ namespace YigguMod;
 
 /// <summary>
 /// 里香暴走 —— 2 费攻击。稀有度：罕见。
-///   里香造成 10 点伤害，加上她已损失的生命值。升级后基础 14 点。
+///   里香造成 8 点伤害，加上她已损失的生命值。升级后基础 12 点。
 ///
 /// 原作：里香受伤后会暴怒失控。完全显现期间她替乙骨挡刀而掉血，这张牌把那些伤转成输出。
 ///
@@ -33,7 +33,7 @@ public sealed class RikaRampage : CardModel
 
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
-		new RikaDamageVar(10m, ValueProp.Move)
+		new RikaDamageVar(8m, ValueProp.Move)
 	};
 
 	protected override IEnumerable<IHoverTip> ExtraHoverTips => new IHoverTip[]
@@ -65,6 +65,6 @@ public sealed class RikaRampage : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(4m); // 10 → 14
+		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(4m); // 8 → 12
 	}
 }

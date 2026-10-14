@@ -15,7 +15,8 @@ namespace YigguMod;
 /// <summary>
 /// 纯爱炮 —— 2 费攻击。稀有度：稀有。消耗。
 ///   仅里香完全显现时可打出。
-///   完全显现剩余每 1 回合，里香对所有敌人造成 10 点伤害，然后完全显现结束。升级后每回合 14 点。
+///   完全显现剩余每 1 回合，里香对所有敌人造成 7 点伤害，然后完全显现结束。升级后每回合 10 点。
+///   （5 回合 = 35 点全体；配合诅咒女王 / 束缚延长后会更高）
 ///
 /// 原作：0 卷决战，乙骨把自己的一切献给里香，解放她的力量射出「纯爱」——最强的诅咒。
 /// 对应到游戏：把剩下的完全显现回合一次性烧掉，换成一发全体伤害。
@@ -37,7 +38,7 @@ public sealed class PureLoveBeam : CardModel
 
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
-		new RikaDamageVar(10m, ValueProp.Move)
+		new RikaDamageVar(7m, ValueProp.Move)
 	};
 
 	protected override IEnumerable<IHoverTip> ExtraHoverTips => new IHoverTip[]
@@ -72,6 +73,6 @@ public sealed class PureLoveBeam : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(4m); // 每回合 10 → 14
+		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(3m); // 每回合 7 → 10
 	}
 }

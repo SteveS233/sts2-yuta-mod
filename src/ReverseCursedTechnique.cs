@@ -29,6 +29,9 @@ namespace YigguMod;
 /// </summary>
 public sealed class ReverseCursedTechnique : CardModel
 {
+	/// <summary>消耗（平衡：可反复打出的回血会让战斗外的生命管理失去意义）。</summary>
+	public override IEnumerable<CardKeyword> CanonicalKeywords => new CardKeyword[] { CardKeyword.Exhaust };
+
 	/// <summary>基础再生层数。升级后 +1。</summary>
 	private const decimal BaseRegen = 5m;
 

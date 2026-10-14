@@ -4,7 +4,7 @@
   "WHICH_ONE_YUTA_POWER.title": "忧太，要用哪个？",
   "WHICH_ONE_YUTA_POWER.description": "完全显现期间，每回合开始时从3张牌中选择1张加入你的手牌，该牌在本回合可免费打出。候选优先取自里香储存的术式，不足时用其他角色的牌补足。",
   "FULL_MANIFESTATION_POWER.title": "完全显现",
-  "FULL_MANIFESTATION_POWER.description": "每回合开始时获得2点额外能量。\n乙骨受到的攻击伤害改由里香承受。\n层数为剩余的回合数，归零后里香退回部分显现。",
+  "FULL_MANIFESTATION_POWER.description": "每回合开始时获得1点额外能量。\n乙骨受到的攻击伤害改由里香承受。\n层数为剩余的回合数，归零后里香退回部分显现。",
   "AUTONOMOUS_GUARD_POWER.title": "自发守护",
   "AUTONOMOUS_GUARD_POWER.description": "每回合开始时，若里香在场，她对随机一名敌人造成等同于层数的伤害。",
   "DOMAIN_POWER.title": "领域展开",
@@ -12,5 +12,7 @@
   "UNTIL_DEATH_POWER.title": "至死不渝",
   "UNTIL_DEATH_POWER.description": "完全显现期间，每回合开始时获得等同于层数的格挡。",
   "QUEEN_OF_CURSES_POWER.title": "诅咒女王",
-  "QUEEN_OF_CURSES_POWER.description": "每当里香进入完全显现，每层额外持续2回合，里香获得2点力量。"
+  "QUEEN_OF_CURSES_POWER.description": "每当里香进入完全显现，每层额外持续2回合，里香获得2点力量。",
+  "TOGETHER_WITH_RIKA_POWER.title": "与里香同在",
+  "TOGETHER_WITH_RIKA_POWER.description": "每当乙骨打出一张攻击牌，若里香在场，她对随机一名敌人造成等同于层数的伤害。"
 }

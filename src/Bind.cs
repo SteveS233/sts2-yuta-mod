@@ -13,7 +13,7 @@ namespace YigguMod;
 
 /// <summary>
 /// 束缚 —— 0 费技能。稀有度：普通（CardRarity.Common）。
-///   失去 10 点生命，使完全显现的回合数 +3。升级后 +5。
+///   失去 6 点生命，使完全显现的回合数 +3。升级后 +5。
 ///
 /// 原作的「束缚」：以自我限制换取力量。这里就是以生命换取完全显现多持续几个回合。
 /// 回合数就是 FullManifestationPower 的层数；该状态为 Counter，
@@ -28,7 +28,7 @@ namespace YigguMod;
 public sealed class Bind : CardModel
 {
 	/// <summary>失去的生命值。</summary>
-	private const decimal HpLoss = 10m;
+	private const decimal HpLoss = 6m;
 
 	/// <summary>完全显现回合数的增加量（升级后 +2，即 3 → 5）。</summary>
 	private const decimal DurationGain = 3m;

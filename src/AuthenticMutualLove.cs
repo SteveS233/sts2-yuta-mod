@@ -53,12 +53,7 @@ public sealed class AuthenticMutualLove : CardModel
 		}
 		await PowerCmd.Apply<DomainPower>(choiceContext, base.Owner.Creature, 1m, base.Owner.Creature, this);
 
-		IReadOnlyList<CardModel> stored = CopiedTechniques.Stored(base.Owner);
-		if (stored.Count > 0)
-		{
-			List<CardModel> options = CopiedTechniques.BuildOffer(base.Owner, stored, null, CopiedTechniques.OfferCount);
-			await CopiedTechniques.OfferToHand(choiceContext, base.Owner, options, upgrade: false);
-		}
+		await CopiedTechniques.OfferStoredToHand(choiceContext, base.Owner);
 	}
 
 	protected override void OnUpgrade()

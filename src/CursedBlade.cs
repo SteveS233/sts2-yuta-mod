@@ -14,7 +14,7 @@ namespace YigguMod;
 
 /// <summary>
 /// 咒力附刀 —— 1 费攻击。稀有度：普通。
-///   造成 8 点伤害。里香完全显现期间改为攻击 2 次。升级后 11 点。
+///   造成 6 点伤害。里香完全显现期间改为攻击 2 次。升级后 8 点。
 ///
 /// 原作：乙骨惯用刀，并以咒力强化刀身；完全显现时里香是近乎无限的咒力库。
 /// 这是乙骨本人的攻击（FromCard），吃的是乙骨自己的力量 —— 与「咒力强化」配合。
@@ -23,7 +23,7 @@ namespace YigguMod;
 /// </summary>
 public sealed class CursedBlade : CardModel
 {
-	private const decimal BaseDamage = 8m;
+	private const decimal BaseDamage = 6m;
 
 	public CursedBlade()
 		: base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
@@ -58,6 +58,6 @@ public sealed class CursedBlade : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars.Damage.UpgradeValueBy(3m); // 8 → 11
+		base.DynamicVars.Damage.UpgradeValueBy(2m); // 6 → 8
 	}
 }

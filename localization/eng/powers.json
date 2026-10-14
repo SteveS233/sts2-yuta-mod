@@ -4,7 +4,7 @@
   "WHICH_ONE_YUTA_POWER.title": "Yuta, Which One?",
   "WHICH_ONE_YUTA_POWER.description": "During Full Manifestation, at the start of each turn choose 1 of 3 cards to add to your hand. It costs 0 this turn. Rika's stored Techniques are offered first; cards from other characters fill the rest.",
   "FULL_MANIFESTATION_POWER.title": "Full Manifestation",
-  "FULL_MANIFESTATION_POWER.description": "At the start of each turn, gain 2 additional Energy.\nAttack damage Yuta would take is dealt to Rika instead.\nThe amount is the number of turns remaining; at 0 Rika returns to partial manifestation.",
+  "FULL_MANIFESTATION_POWER.description": "At the start of each turn, gain 1 additional Energy.\nAttack damage Yuta would take is dealt to Rika instead.\nThe amount is the number of turns remaining; at 0 Rika returns to partial manifestation.",
   "AUTONOMOUS_GUARD_POWER.title": "Autonomous Guard",
   "AUTONOMOUS_GUARD_POWER.description": "At the start of each turn, if Rika is present, she deals damage equal to the amount to a random enemy.",
   "DOMAIN_POWER.title": "Domain Expansion",
@@ -12,5 +12,7 @@
   "UNTIL_DEATH_POWER.title": "Until Death",
   "UNTIL_DEATH_POWER.description": "During Full Manifestation, at the start of each turn gain Block equal to the amount.",
   "QUEEN_OF_CURSES_POWER.title": "Queen of Curses",
-  "QUEEN_OF_CURSES_POWER.description": "Whenever Rika enters Full Manifestation, per stack it lasts 2 more turns and Rika gains 2 Strength."
+  "QUEEN_OF_CURSES_POWER.description": "Whenever Rika enters Full Manifestation, per stack it lasts 2 more turns and Rika gains 2 Strength.",
+  "TOGETHER_WITH_RIKA_POWER.title": "Together with Rika",
+  "TOGETHER_WITH_RIKA_POWER.description": "Whenever Yuta plays an Attack, if Rika is present, she deals damage equal to the amount to a random enemy."
 }

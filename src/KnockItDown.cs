@@ -15,8 +15,9 @@ namespace YigguMod;
 
 /// <summary>
 /// 打下来！ —— 2 费攻击。
-///   里香造成 20 点伤害，给予 1 层虚弱。
-///   升级后：里香造成 30 点伤害，给予 2 层虚弱。
+///   里香造成 14 点伤害，给予 1 层虚弱。
+///   升级后：里香造成 18 点伤害，给予 2 层虚弱。
+///   （对照奥斯提「击掌」2 费 11 点 + 2 层易伤）
 ///
 /// 部分显现即可打出（里香在场就能出手），不需要完全显现。
 ///
@@ -32,7 +33,7 @@ namespace YigguMod;
 public sealed class KnockItDown : CardModel
 {
 	/// <summary>基础伤害。升级后 +10。</summary>
-	private const decimal BaseDamage = 20m;
+	private const decimal BaseDamage = 14m;
 
 	/// <summary>基础虚弱层数。升级后 +1。</summary>
 	private const decimal BaseWeak = 1m;
@@ -85,7 +86,7 @@ public sealed class KnockItDown : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(10m); // 20 → 30
+		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(4m); // 14 → 18
 		base.DynamicVars.Weak.UpgradeValueBy(1m);        // 1 → 2
 	}
 }

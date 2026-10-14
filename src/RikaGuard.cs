@@ -13,7 +13,8 @@ namespace YigguMod;
 
 /// <summary>
 /// 里香护主 —— 1 费技能。稀有度：普通。
-///   获得 7 点格挡。若里香在场，再获得 3 点格挡。升级后基础格挡 10。
+///   获得 5 点格挡。若里香在场，再获得 3 点格挡。升级后基础格挡 8。
+///   （里香几乎总在场，实际是 1 费 8 格挡，与官方「耸肩无视」持平）
 ///
 /// 原作：里香会自发出手保护乙骨。
 /// 额外格挡单独用一个具名 BlockVar（ExtraBlock），这样两段格挡都会吃敏捷，
@@ -36,7 +37,7 @@ public sealed class RikaGuard : CardModel
 
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
-		new BlockVar(7m, ValueProp.Move),
+		new BlockVar(5m, ValueProp.Move),
 		new BlockVar(ExtraBlockVarName, 3m, ValueProp.Move)
 	};
 
@@ -60,6 +61,6 @@ public sealed class RikaGuard : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars.Block.UpgradeValueBy(3m); // 7 → 10
+		base.DynamicVars.Block.UpgradeValueBy(3m); // 5 → 8
 	}
 }

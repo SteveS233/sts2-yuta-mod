@@ -23,5 +23,6 @@
   "RIKAS_PHOTO.flavor": "六年前拍的。照片里的她还是那个约好要结婚的女孩。",
   "YAGAS_CURSED_CORPSE.title": "夜蛾的咒骸",
   "YAGAS_CURSED_CORPSE.description": "每当[gold]里香[/gold]受到攻击伤害，获得[blue]{Block}[/blue]点[gold]格挡[/gold]。",
-  "YAGAS_CURSED_CORPSE.flavor": "夜蛾校长亲手做的咒骸。据说会自己动。"
+  "YAGAS_CURSED_CORPSE.flavor": "夜蛾校长亲手做的咒骸。据说会自己动。",
+  "PROMISE_RING.selectionScreenPrompt": "选择一项术式加入手牌"
 }

@@ -24,14 +24,14 @@ namespace YigguMod;
 /// </summary>
 internal static class RikaSummon
 {
-	/// <summary>里香的生命值。</summary>
-	public const decimal MaxHp = 100m;
+	/// <summary>里香的生命值。（平衡：100 → 60，她在完全显现期间替乙骨承受攻击，生命即护盾。）</summary>
+	public const decimal MaxHp = 60m;
 
 	/// <summary>「完全显现」持续几个回合。</summary>
 	public const decimal DurationTurns = 5m;
 
-	/// <summary>完全显现期间每回合提供的额外能量。</summary>
-	public const decimal EnergyPerTurn = 2m;
+	/// <summary>完全显现期间每回合提供的额外能量。（平衡：2 → 1。完全显现可反复打出，+2 相当于常驻的每回合 +2 能量。）</summary>
+	public const decimal EnergyPerTurn = 1m;
 
 	/// <summary>取玩家的里香（可能已死亡，也可能本场战斗根本没有她）。</summary>
 	public static Creature Get(Player owner)
@@ -98,11 +98,6 @@ internal static class RikaSummon
 			await QueenOfCursesPower.Empower(choiceContext, owner, queen.Amount, source);
 		}
 
-		IReadOnlyList<CardModel> stored = CopiedTechniques.Stored(owner);
-		if (stored.Count > 0)
-		{
-			List<CardModel> options = CopiedTechniques.BuildOffer(owner, stored, null, CopiedTechniques.OfferCount);
-			await CopiedTechniques.OfferToHand(choiceContext, owner, options, upgrade: false);
-		}
+		await CopiedTechniques.OfferStoredToHand(choiceContext, owner);
 	}
 }

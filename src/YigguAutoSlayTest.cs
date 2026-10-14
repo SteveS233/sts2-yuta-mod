@@ -136,6 +136,7 @@ internal static class YigguAutoSlayTest
 				{
 					return;
 				}
+				CheckDustyTomeOnce(players);
 				for (int i = 0; i < players.Count && i < __result.Players.Count; i++)
 				{
 					PromiseRing live = CopiedTechniques.Ring(players[i]);
@@ -165,6 +166,31 @@ internal static class YigguAutoSlayTest
 			catch (Exception ex)
 			{
 				Log.Error(LogPrefix + "存档往返校验抛出异常：" + ex);
+			}
+		}
+
+		private static bool _dustyTomeChecked;
+
+		/// <summary>
+		/// 先古之民「达弗」提供的遗物「积灰的典籍」要从角色卡池里挑一张先古牌；
+		/// 卡池里没有时会空引用、事件卡死。AutoSlay 不一定遇到达弗，所以在这里直接调用一次核对。
+		/// </summary>
+		private static void CheckDustyTomeOnce(IReadOnlyList<Player> players)
+		{
+			if (_dustyTomeChecked || players.Count == 0)
+			{
+				return;
+			}
+			_dustyTomeChecked = true;
+			try
+			{
+				var tome = (MegaCrit.Sts2.Core.Models.Relics.DustyTome)ModelDb.Relic<MegaCrit.Sts2.Core.Models.Relics.DustyTome>().ToMutable();
+				tome.SetupForPlayer(players[0]);
+				Log.Info(LogPrefix + "积灰的典籍校验 OK：选中 " + tome.AncientCard);
+			}
+			catch (Exception ex)
+			{
+				Log.Error(LogPrefix + "积灰的典籍校验失败：" + ex);
 			}
 		}
 

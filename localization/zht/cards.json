@@ -2,7 +2,7 @@
   "FULL_MANIFESTATION.title": "完全顯現",
   "FULL_MANIFESTATION.description": "使[gold]里香[/gold][gold]完全顯現[/gold]5回合。\n若她儲存了[gold]術式[/gold]，從中選擇1張加入你的[gold]手牌[/gold]，本回合免費打出。",
   "CURSED_ENERGY_REINFORCEMENT.title": "咒力強化",
-  "CURSED_ENERGY_REINFORCEMENT.description": "獲得X點[gold]力量[/gold]，獲得X點[gold]敏捷[/gold]，獲得{Block:diff()}點[gold]格擋[/gold]。{IfUpgraded:show:\n獲得X點能量。|}",
+  "CURSED_ENERGY_REINFORCEMENT.description": "獲得X{IfUpgraded:show:+1|}點[gold]力量[/gold]，獲得X{IfUpgraded:show:+1|}點[gold]敏捷[/gold]，獲得{Block:diff()}點[gold]格擋[/gold]。",
   "KNOCK_IT_DOWN.title": "打下來！",
   "KNOCK_IT_DOWN.description": "[gold]里香[/gold]造成{RikaDamage:diff()}點傷害，給予{WeakPower:diff()}層[gold]虛弱[/gold]。",
   "REVERSE_CURSED_TECHNIQUE.title": "反轉術式",
@@ -50,5 +50,7 @@
   "QUEEN_OF_CURSES.title": "詛咒女王",
   "QUEEN_OF_CURSES.description": "每當[gold]里香[/gold]進入[gold]完全顯現[/gold]，額外持續2回合，里香獲得2點[gold]力量[/gold]。",
   "TECHNIQUE_RELEASE.title": "術式解放",
-  "TECHNIQUE_RELEASE.description": "造成{Damage:diff()}點傷害X次。\nX等於1加上[gold]約定之戒[/gold]中儲存的[gold]術式[/gold]數。"
+  "TECHNIQUE_RELEASE.description": "造成{Damage:diff()}點傷害X次。\nX等於1加上[gold]約定之戒[/gold]中儲存的[gold]術式[/gold]數。",
+  "TOGETHER_WITH_RIKA.title": "與里香同在",
+  "TOGETHER_WITH_RIKA.description": "每當你打出一張攻擊牌，若[gold]里香[/gold]在場，她對隨機一名敵人造成{TogetherWithRikaPower:diff()}點傷害。"
 }
