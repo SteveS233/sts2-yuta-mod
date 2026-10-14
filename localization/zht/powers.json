@@ -8,5 +8,9 @@
   "AUTONOMOUS_GUARD_POWER.title": "自發守護",
   "AUTONOMOUS_GUARD_POWER.description": "每回合開始時，若里香在場，她對隨機一名敵人造成等同於層數的傷害。",
   "DOMAIN_POWER.title": "領域展開",
-  "DOMAIN_POWER.description": "本場戰鬥中，完全顯現不再減少回合數。"
+  "DOMAIN_POWER.description": "本場戰鬥中，完全顯現不再減少回合數。",
+  "UNTIL_DEATH_POWER.title": "至死不渝",
+  "UNTIL_DEATH_POWER.description": "完全顯現期間，每回合開始時獲得等同於層數的格擋。",
+  "QUEEN_OF_CURSES_POWER.title": "詛咒女王",
+  "QUEEN_OF_CURSES_POWER.description": "每當里香進入完全顯現，每層額外持續2回合，里香獲得2點力量。"
 }

@@ -84,6 +84,20 @@ internal static class RikaSummon
 		}
 		await PowerCmd.Apply<FullManifestationPower>(choiceContext, rika, DurationTurns, owner.Creature, source);
 
+		// 遗物「狗卷的扩音器」：抽 2 张
+		InumakiMegaphone megaphone = owner.GetRelic<InumakiMegaphone>();
+		if (megaphone != null)
+		{
+			await megaphone.OnManifest(choiceContext);
+		}
+
+		// 诅咒女王：每层额外 2 回合 + 里香 2 点力量
+		QueenOfCursesPower queen = owner.Creature.GetPower<QueenOfCursesPower>();
+		if (queen != null)
+		{
+			await QueenOfCursesPower.Empower(choiceContext, owner, queen.Amount, source);
+		}
+
 		IReadOnlyList<CardModel> stored = CopiedTechniques.Stored(owner);
 		if (stored.Count > 0)
 		{

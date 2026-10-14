@@ -61,6 +61,14 @@ $settings | Add-Member -NotePropertyName mod_settings -NotePropertyValue $modSet
 [IO.File]::WriteAllText($settingsPath, ($settings | ConvertTo-Json -Depth 32), (New-Object Text.UTF8Encoding $false))
 Write-Host "==> 测试存档：只启用 YigguMod（共登记 $($modList.Count) 个本地 mod）" -ForegroundColor Cyan
 
+# 清空测试存档里的进度与未完成的局，让每次测试从同样的状态开始
+# （进度会随多次通关累积，触发 AutoSlay 不会处理的解锁弹窗）。只动隔离的 default 目录。
+$testSaves = Join-Path $userDir 'default\1\modded\profile1\saves'
+if (Test-Path -LiteralPath $testSaves) {
+  Get-ChildItem -LiteralPath $testSaves -File | Where-Object { $_.Name -like 'progress.save*' -or $_.Name -like 'current_run.save*' } |
+    Remove-Item -Force
+}
+
 # --- 2. 启动 ---
 if (-not $Seed) { $Seed = -join ((48..57) + (65..90) | Get-Random -Count 10 | ForEach-Object { [char]$_ }) }
 $buildDir = Join-Path $root 'build'

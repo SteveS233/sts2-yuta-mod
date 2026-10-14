@@ -40,12 +40,12 @@ public sealed class Yiggu : CharacterModel
 
 	// ---- 卡池 / 遗物池 / 药水池 ----
 	// 卡池已独立为 YigguCardPool，乙骨的卡不再混进铁甲战士的卡池。
-	// 遗物池 / 药水池暂时仍复用铁甲战士的（等乙骨自己的遗物、药水做出来再独立）。
+	// 遗物池为乙骨专属（YigguRelicPool）；药水池暂时仍复用铁甲战士的。
 	public override CardPoolModel CardPool => ModelDb.CardPool<YigguCardPool>();
 
 	public override PotionPoolModel PotionPool => ModelDb.PotionPool<IroncladPotionPool>();
 
-	public override RelicPoolModel RelicPool => ModelDb.RelicPool<IroncladRelicPool>();
+	public override RelicPoolModel RelicPool => ModelDb.RelicPool<YigguRelicPool>();
 
 	/// <summary>
 	/// 初始牌组：4 张打击 + 4 张防御 + 1 张咒力强化（打击 / 防御暂用铁甲战士的基础牌）。
@@ -68,7 +68,10 @@ public sealed class Yiggu : CharacterModel
 		ModelDb.Card<CursedEnergyReinforcement>()
 	};
 
-	public override IReadOnlyList<RelicModel> StartingRelics => new[] { ModelDb.Relic<PromiseRing>() };
+	/// <summary>初始遗物：约定之戒。自动化测试模式下改为遗物池里的全部遗物，见 YigguAutoSlayTest。</summary>
+	public override IReadOnlyList<RelicModel> StartingRelics => YigguAutoSlayTest.Active
+		? YigguAutoSlayTest.AllYigguRelics
+		: new[] { ModelDb.Relic<PromiseRing>() };
 
 	public override float AttackAnimDelay => 0.15f;
 

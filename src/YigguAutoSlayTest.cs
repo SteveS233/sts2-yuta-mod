@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.AutoSlay;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Logging;
@@ -34,7 +35,7 @@ namespace YigguMod;
 /// 做的事：
 ///   1. 主菜单就绪后关掉可能弹出的提示框，然后启动 AutoSlay；
 ///   2. 选角色时把乙骨以外的角色全部锁上（AutoSlay 会在已解锁的角色里随机选）；
-///   3. 初始牌组额外塞入要测的牌，保证它们会被打出（见 Yiggu.StartingDeck）；
+///   3. 初始牌组额外塞入卡池里的全部牌、初始遗物换成遗物池里的全部遗物（见 Yiggu），保证它们都被测到；
 ///   4. 每次写存档时，把约定之戒按存档内容还原一遍，核对储存的术式是否一致（存档往返校验）。
 /// 结果写进 godot.log，前缀统一为 [YigguTest]。
 /// </summary>
@@ -54,25 +55,19 @@ internal static class YigguAutoSlayTest
 
 	public static bool Active => CommandLineHelper.HasArg(Arg);
 
-	/// <summary>测试模式下追加进初始牌组的牌：依赖里香与复制术式的牌各来几张。</summary>
-	public static IEnumerable<CardModel> ExtraStartingCards => new CardModel[]
-	{
-		ModelDb.Card<Imitation>(),
-		ModelDb.Card<Imitation>(),
-		ModelDb.Card<KnockItDown>(),
-		ModelDb.Card<Bind>(),
-		ModelDb.Card<WhichOneYuta>(),
-		ModelDb.Card<RikaClaw>(),
-		ModelDb.Card<CursedBlade>(),
-		ModelDb.Card<QuickDraw>(),
-		ModelDb.Card<RikaGuard>(),
-		ModelDb.Card<RikasCursedEnergy>(),
-		ModelDb.Card<CursedSpeechDontMove>(),
-		ModelDb.Card<AutonomousGuard>(),
-		ModelDb.Card<Devour>(),
-		ModelDb.Card<PureLoveBeam>(),
-		ModelDb.Card<AuthenticMutualLove>()
-	};
+	/// <summary>
+	/// 测试模式下追加进初始牌组的牌：卡池里每张非 Basic 牌各一张，再多一张「模仿」（多制造斩杀）。
+	/// 直接从卡池读取，新加的牌自动纳入测试。
+	/// </summary>
+	public static IEnumerable<CardModel> ExtraStartingCards => ModelDb.CardPool<YigguCardPool>().AllCards
+		.Where((CardModel c) => c.Rarity != CardRarity.Basic)
+		.Append(ModelDb.Card<Imitation>());
+
+	/// <summary>
+	/// 测试模式下的初始遗物：乙骨遗物池里的全部遗物（含约定之戒）。
+	/// 遗物平时只从精英 / 商店随机获得，不这样做 AutoSlay 几乎测不到它们。
+	/// </summary>
+	public static IReadOnlyList<RelicModel> AllYigguRelics => ModelDb.RelicPool<YigguRelicPool>().AllRelics.ToList();
 
 	/// <summary>主菜单就绪 → 启动 AutoSlay（整个进程只启动一次）。</summary>
 	[HarmonyPatch(typeof(NMainMenu), nameof(NMainMenu._Ready))]
@@ -176,6 +171,34 @@ internal static class YigguAutoSlayTest
 		private static string Describe(PromiseRing ring)
 		{
 			return string.Join(", ", ring.StoredTechniques.Select(c => c.Id.Entry));
+		}
+	}
+
+	/// <summary>
+	/// 触发记录：本 mod 的遗物 / 能力每次 Flash（官方惯例：生效时闪一下）都记一行日志，
+	/// 测试结束后据此确认每个遗物、能力都真正触发过。
+	/// </summary>
+	[HarmonyPatch(typeof(RelicModel), nameof(RelicModel.Flash), new System.Type[] { typeof(IEnumerable<MegaCrit.Sts2.Core.Entities.Creatures.Creature>) })]
+	private static class LogRelicFlash
+	{
+		private static void Postfix(RelicModel __instance)
+		{
+			if (Active && __instance.GetType().Namespace == nameof(YigguMod))
+			{
+				Log.Info(LogPrefix + "触发：" + __instance.Id.Entry);
+			}
+		}
+	}
+
+	[HarmonyPatch(typeof(PowerModel), "Flash")]
+	private static class LogPowerFlash
+	{
+		private static void Postfix(PowerModel __instance)
+		{
+			if (Active && __instance.GetType().Namespace == nameof(YigguMod))
+			{
+				Log.Info(LogPrefix + "触发：" + __instance.Id.Entry);
+			}
 		}
 	}
 }

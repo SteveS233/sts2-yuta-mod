@@ -58,7 +58,7 @@ public sealed class YigguCardPool : CardPoolModel
 	///   InvalidOperationException: Can't generate valid rarity for merchant card type ...
 	/// 并导致房间黑屏卡死。
 	///
-	/// 当前：攻击 6、技能 7、能力 2（Basic 的咒力强化、完全显现不计入，商店会过滤掉它们）。
+	/// 当前：攻击 10、技能 9、能力 4（Basic 的咒力强化、完全显现不计入，商店会过滤掉它们）。
 	///
 	/// 【事件「药水的未来」的要求更严】它按「稀有度 × 类型」从本卡池里找牌，
 	/// 以下每格至少要有一张非 Basic 牌，否则选该选项会抛
@@ -82,6 +82,9 @@ public sealed class YigguCardPool : CardPoolModel
 		ModelDb.Card<Bind>(),                  // 技能
 		ModelDb.Card<RikaGuard>(),             // 技能
 		ModelDb.Card<RikasCursedEnergy>(),     // 技能
+		ModelDb.Card<Slash>(),                 // 攻击
+		ModelDb.Card<BladeParry>(),            // 攻击
+		ModelDb.Card<SootheRika>(),            // 技能
 
 		// ===== 罕见 =====
 		ModelDb.Card<KnockItDown>(),           // 攻击
@@ -89,11 +92,17 @@ public sealed class YigguCardPool : CardPoolModel
 		ModelDb.Card<CursedSpeechDontMove>(),  // 技能
 		ModelDb.Card<Devour>(),                // 技能
 		ModelDb.Card<AutonomousGuard>(),       // 能力
+		ModelDb.Card<FlurryOfCuts>(),          // 攻击
+		ModelDb.Card<RikaRampage>(),           // 攻击
+		ModelDb.Card<ReverseCursedOutput>(),   // 技能
+		ModelDb.Card<UntilDeath>(),            // 能力
 
 		// ===== 稀有 =====
 		ModelDb.Card<Imitation>(),             // 攻击
 		ModelDb.Card<PureLoveBeam>(),          // 攻击
 		ModelDb.Card<AuthenticMutualLove>(),   // 技能
-		ModelDb.Card<WhichOneYuta>()           // 能力
+		ModelDb.Card<WhichOneYuta>(),          // 能力
+		ModelDb.Card<QueenOfCurses>(),         // 能力
+		ModelDb.Card<TechniqueRelease>()       // 攻击
 	};
 }
