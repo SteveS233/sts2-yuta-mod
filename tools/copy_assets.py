@@ -18,7 +18,11 @@ import os
 import re
 import sys
 
-GAME_PCK = r"D:\SteamLibrary\steamapps\common\Slay the Spire 2\SlayTheSpire2.pck"
+# 游戏 pck 路径：优先读环境变量 STS2_GAME_PCK（build.ps1 会按 -GameDir 设置），
+# 没有时回退到默认安装位置。
+GAME_PCK = os.environ.get(
+    "STS2_GAME_PCK",
+    r"D:\SteamLibrary\steamapps\common\Slay the Spire 2\SlayTheSpire2.pck")
 _UID_RE = re.compile(r'uid="uid://[^"]*"\s*')
 
 

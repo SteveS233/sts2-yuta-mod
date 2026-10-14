@@ -19,16 +19,16 @@ public static class ModEntry
 		// 这一步是必需的：角色选择界面在读取遗物描述时就会查询 Pool，
 		// 异常会中断 NCharacterSelectScreen.SelectCharacter，导致角色根本没被写进 lobby。
 		// Rarity 为 Starter，而 RelicFactory.RollRarity 只产出 Common/Uncommon/Rare，
-		// 所以入池不会让「里香」出现在遗物奖励里。
+		// 所以入池不会让「约定之戒」出现在遗物奖励里。
 		//
 		// TODO: 乙骨有自己的遗物池后，改挂到 YigguRelicPool 上。
-		ModHelper.AddModelToPool<IroncladRelicPool, Rika>();
+		ModHelper.AddModelToPool<IroncladRelicPool, PromiseRing>();
 
 		// 卡牌不需要在这里注册：
 		// 乙骨的卡全部由 YigguCardPool.GenerateAllCards() 提供。
 		// 若同时对同一个池调用 AddModelToPool，AllCards 会出现重复条目。
 
 		new Harmony("yiggumod.sts2").PatchAll(typeof(ModEntry).Assembly);
-		Log.Info("[YigguMod] 已加载：乙骨忧太（80 生命 / 4 打击 4 防御 + 咒力强化 / 初始遗物：里香 → 完全显现）");
+		Log.Info("[YigguMod] 已加载：乙骨忧太（80 生命 / 4 打击 4 防御 + 咒力强化 / 初始遗物：约定之戒 → 里香 / 完全显现）");
 	}
 }

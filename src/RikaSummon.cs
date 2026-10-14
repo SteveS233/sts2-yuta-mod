@@ -9,53 +9,84 @@ using MegaCrit.Sts2.Core.Models;
 namespace YigguMod;
 
 /// <summary>
-/// 里香 —— 召唤物本身的一切定义与效果。
+/// 里香 —— 召唤、显现与状态查询的统一入口。
 ///
-/// 设计约定：**所有和里香有关的效果都归属在这里**（生命值、每回合加费、持续回合数），
-/// 卡牌「完全显现」只负责触发召唤，自身不携带任何数值，
-/// 因此它的卡面可以只有一句「使里香完全显现 5 回合」。
+/// 设计约定：**所有和里香有关的数值都定义在这里**（生命值、每回合加费、完全显现回合数），
+/// 卡牌只负责触发，自身不携带这些数值。
 ///
-/// 【当前用奥斯提实现里香】游戏里唯一现成的召唤物是死灵缚者的奥斯提，
-/// 所以先套用它。等里香有独立的召唤物后，只需替换本类里的召唤实现，卡牌无需改动。
+/// 两种形态（详见 Rika 类注释）：
+///   · 部分显现 —— 里香在场（IsPresent），身上挂着 RikaPower；
+///   · 完全显现 —— 在此基础上她身上还挂着 FullManifestationPower（IsFullyManifested）。
+///
+/// 卡牌判断「里香在不在」一律走这里，不要直接查 Player.IsOstyMissing ——
+/// 里香已经不是奥斯提了，那个属性对她永远返回「不在场」。
 /// </summary>
 internal static class RikaSummon
 {
 	/// <summary>里香的生命值。</summary>
 	public const decimal MaxHp = 100m;
 
-	/// <summary>里香「完全显现」持续几个回合。</summary>
+	/// <summary>「完全显现」持续几个回合。</summary>
 	public const decimal DurationTurns = 5m;
 
-	/// <summary>里香在场时每回合提供的额外能量。</summary>
+	/// <summary>完全显现期间每回合提供的额外能量。</summary>
 	public const decimal EnergyPerTurn = 2m;
 
-	/// <summary>
-	/// 让里香完全显现：
-	///   1. 召唤她；
-	///   2. 把「持续回合 + 每回合加费」的状态挂在她自己身上；
-	///   3. 把「模仿」累计夺取的效果挂到玩家身上 —— 按需求，这些效果只在里香在场时生效，
-	///      所以在此刻激活（离场时由 RikaPower.AfterRemoved 收回）。
-	///
-	/// 状态挂在召唤物而非玩家身上有两个好处：
-	///   1. 效果归属于里香本人，符合设定；
-	///   2. 里香若被击倒，她身上的状态会随她一起消失，加费立即停止，不需要额外清理逻辑。
-	/// </summary>
-	public static async Task Manifest(PlayerChoiceContext choiceContext, Player owner, CardModel source)
+	/// <summary>取玩家的里香（可能已死亡，也可能本场战斗根本没有她）。</summary>
+	public static Creature Get(Player owner)
 	{
-		await OstyCmd.Summon(choiceContext, owner, MaxHp, source);
+		return owner?.PlayerCombatState?.GetPet<Rika>();
+	}
 
-		Creature rika = owner.Osty;
-		if (rika == null)
+	/// <summary>里香是否在场（部分显现或完全显现均算）。</summary>
+	public static bool IsPresent(Player owner)
+	{
+		Creature rika = Get(owner);
+		return rika != null && rika.IsAlive;
+	}
+
+	/// <summary>里香是否处于完全显现状态。</summary>
+	public static bool IsFullyManifested(Player owner)
+	{
+		Creature rika = Get(owner);
+		return rika != null && rika.IsAlive && rika.Powers.Any(p => p is FullManifestationPower);
+	}
+
+	/// <summary>
+	/// 召唤部分显现的里香。由遗物「约定之戒」在每场战斗开始时调用。
+	/// 战斗中的宠物不进存档、战斗结束即清空，所以每场都要重新召唤（官方 Byrdpip 同理）。
+	/// </summary>
+	public static async Task Summon(Player owner)
+	{
+		if (Get(owner) != null)
 		{
 			return;
 		}
-		await PowerCmd.Apply<RikaPower>(choiceContext, rika, DurationTurns, null, source);
+		Creature rika = await PlayerCmd.AddPet<Rika>(owner);
+		await PowerCmd.Apply<RikaPower>(new ThrowingPlayerChoiceContext(), rika, 1m, null, null);
+	}
 
-		// 里香登场 → 激活「模仿」记录的效果。
-		Rika rikaRelic = owner.Relics.OfType<Rika>().FirstOrDefault();
-		if (rikaRelic != null)
+	/// <summary>
+	/// 让里香完全显现：
+	///   1. 把 FullManifestationPower 挂在她身上（持续回合 / 每回合加费 / 替乙骨承受攻击）；
+	///   2. 激活「模仿」累计夺取的效果 —— 这些效果只在完全显现期间生效，
+	///      离场时由 FullManifestationPower.AfterRemoved 收回。
+	///
+	/// 调用方（卡牌「完全显现」）已保证里香在场且尚未完全显现。
+	/// </summary>
+	public static async Task Manifest(PlayerChoiceContext choiceContext, Player owner, CardModel source)
+	{
+		Creature rika = Get(owner);
+		if (rika == null || !rika.IsAlive)
 		{
-			await rikaRelic.ActivateBuffs();
+			return;
+		}
+		await PowerCmd.Apply<FullManifestationPower>(choiceContext, rika, DurationTurns, owner.Creature, source);
+
+		PromiseRing ring = owner.Relics.OfType<PromiseRing>().FirstOrDefault();
+		if (ring != null)
+		{
+			await ring.ActivateBuffs();
 		}
 	}
 }

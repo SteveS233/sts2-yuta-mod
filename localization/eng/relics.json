@@ -1,5 +1,5 @@
 {
-  "RIKA.title": "Rika",
-  "RIKA.description": "At the start of the run, add a [gold]Full Manifestation[/gold] to your deck.",
-  "RIKA.flavor": "[red](This relic's flavor text is yet to be written.)[/red]"
+  "PROMISE_RING.title": "Promise Ring",
+  "PROMISE_RING.description": "At the start of each combat, [gold]Rika[/gold] stays at your side, partially manifested.\nAt the start of the run, add a [gold]Full Manifestation[/gold] to your deck.",
+  "PROMISE_RING.flavor": "A childhood promise, now the bond that keeps her close."
 }

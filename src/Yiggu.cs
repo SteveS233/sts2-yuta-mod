@@ -60,7 +60,7 @@ public sealed class Yiggu : CharacterModel
 		ModelDb.Card<CursedEnergyReinforcement>()
 	};
 
-	public override IReadOnlyList<RelicModel> StartingRelics => new[] { ModelDb.Relic<Rika>() };
+	public override IReadOnlyList<RelicModel> StartingRelics => new[] { ModelDb.Relic<PromiseRing>() };
 
 	public override float AttackAnimDelay => 0.15f;
 

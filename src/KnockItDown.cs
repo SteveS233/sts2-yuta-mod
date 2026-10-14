@@ -8,7 +8,6 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Monsters;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -19,14 +18,12 @@ namespace YigguMod;
 ///   里香造成 20 点伤害，给予 1 层虚弱。
 ///   升级后：里香造成 30 点伤害，给予 2 层虚弱。
 ///
-/// 【伤害来源是里香本人，不是玩家】这一点靠三处保证：
-///   1. OstyDamageVar：官方注释写明是「Osty 专用」的伤害变量，
-///      其在 UpdateCardPreview 里以 card.Owner.Osty 作为伤害来源计算，
-///      因此卡面预览与实际结算都会吃里香自己的力量 / 虚弱等状态。
-///   2. DamageCmd.Attack(...).FromOsty(Owner.Osty, this, cardPlay)：
-///      让这次攻击由里香发出（攻击者是她，不是玩家）。
-///   3. Osty.CheckMissingWithAnim：里香不在场时按官方惯例跳过整个效果
-///      （与「压扁」「骨片」等奥斯提攻击牌一致，不会白嫖伤害）。
+/// 部分显现即可打出（里香在场就能出手），不需要完全显现。
+///
+/// 【伤害来源是里香本人，不是玩家】这一点靠两处保证：
+///   1. RikaDamageVar：卡面预览以里香为伤害来源计算，吃她自己的力量 / 虚弱；
+///   2. DamageCmd.Attack(...).FromRika(...)：实际结算时攻击者也是她。
+/// 里香不在场时不可打出；OnPlay 里再查一次作为兜底（卡牌可能被效果强制打出）。
 ///
 /// 虚弱由玩家施加（与官方「扫堂腿」一致，applier 传 Owner.Creature）。
 ///
@@ -45,12 +42,9 @@ public sealed class KnockItDown : CardModel
 	{
 	}
 
-	/// <summary>标记为召唤物攻击，与官方奥斯提攻击牌一致。</summary>
-	protected override HashSet<CardTag> CanonicalTags => new HashSet<CardTag> { CardTag.OstyAttack };
-
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
-		new OstyDamageVar(BaseDamage, ValueProp.Move),
+		new RikaDamageVar(BaseDamage, ValueProp.Move),
 		new PowerVar<WeakPower>(BaseWeak)
 	};
 
@@ -61,11 +55,8 @@ public sealed class KnockItDown : CardModel
 		HoverTipFactory.FromPower<WeakPower>()
 	};
 
-	/// <summary>里香不在场时卡面泛红，提示这张牌打不出效果。</summary>
-	protected override bool ShouldGlowRedInternal => base.Owner.IsOstyMissing;
-
 	/// <summary>里香不在场时不可打出（与官方「击掌」一致），避免白白浪费一张牌。</summary>
-	protected override bool IsPlayable => !base.Owner.IsOstyMissing;
+	protected override bool IsPlayable => RikaSummon.IsPresent(base.Owner);
 
 	// 暂时复用铁甲战士「重击」的卡图（同为重型打击，贴题）。
 	public override string PortraitPath => ImageHelper.GetImagePath("atlases/card_atlas.sprites/ironclad/bludgeon.tres");
@@ -76,15 +67,15 @@ public sealed class KnockItDown : CardModel
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
 
-		// 里香不在场 → 官方惯例：跳过全部效果（含虚弱），并播放提示动画。
-		if (Osty.CheckMissingWithAnim(base.Owner))
+		// 兜底：里香不在场 → 跳过全部效果（含虚弱）。
+		if (!RikaSummon.IsPresent(base.Owner))
 		{
 			return;
 		}
 
 		// 顺序：先由里香造成伤害，再施加虚弱。
-		await DamageCmd.Attack(base.DynamicVars.OstyDamage.BaseValue)
-			.FromOsty(base.Owner.Osty, this, cardPlay)
+		await DamageCmd.Attack(base.DynamicVars[RikaDamageVar.DefaultName].BaseValue)
+			.FromRika(RikaSummon.Get(base.Owner), this, cardPlay)
 			.Targeting(cardPlay.Target)
 			.WithHitFx("vfx/vfx_attack_blunt", null, "blunt_attack.mp3")
 			.Execute(choiceContext);
@@ -94,7 +85,7 @@ public sealed class KnockItDown : CardModel
 
 	protected override void OnUpgrade()
 	{
-		base.DynamicVars.OstyDamage.UpgradeValueBy(10m); // 20 → 30
+		base.DynamicVars[RikaDamageVar.DefaultName].UpgradeValueBy(10m); // 20 → 30
 		base.DynamicVars.Weak.UpgradeValueBy(1m);        // 1 → 2
 	}
 }

@@ -17,7 +17,8 @@
 [CmdletBinding()]
 param(
   [string]$Configuration = 'Release',
-  [string]$GameDir = 'D:\SteamLibrary\steamapps\common\Slay the Spire 2',
+  # 留空则按常见 Steam 库位置自动探测
+  [string]$GameDir = '',
   [string]$PythonExe = 'C:\Users\24501\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe',
   [string]$SourceCharacter = 'ironclad',
   [string]$CharacterId = 'yiggu',
@@ -37,7 +38,18 @@ $modId = 'YigguMod'
 $build = Join-Path $root 'build'
 
 # --- 0. 校验前提 ---
+if (-not $GameDir) {
+  $candidates = foreach ($drive in 'C','D','E','F','G') {
+    "${drive}:\SteamLibrary\steamapps\common\Slay the Spire 2"
+    "${drive}:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2"
+  }
+  $GameDir = $candidates | Where-Object { Test-Path -LiteralPath (Join-Path $_ 'SlayTheSpire2.pck') } | Select-Object -First 1
+  if (-not $GameDir) { throw '未能自动找到游戏目录，请用 -GameDir 指定' }
+  Write-Host "==> 游戏目录: $GameDir" -ForegroundColor Cyan
+}
 if (-not (Test-Path -LiteralPath $GameDir)) { throw "找不到游戏目录: $GameDir" }
+# 让 tools/ 下的 Python 脚本读取同一个游戏 pck（否则它们会回退到写死的默认路径）
+$env:STS2_GAME_PCK = Join-Path $GameDir 'SlayTheSpire2.pck'
 $gameData = Join-Path $GameDir 'data_sts2_windows_x86_64'
 if (-not (Test-Path -LiteralPath (Join-Path $gameData 'sts2.dll'))) { throw "找不到 sts2.dll: $gameData" }
 if (-not (Test-Path -LiteralPath $PythonExe)) {
@@ -57,8 +69,10 @@ if (-not $SkipAssets) {
   # 因此 images/atlases/power_atlas.sprites/<能力id小写>.tres 必须真实存在。
   Write-Host '==> 复制占位能力图标' -ForegroundColor Cyan
   & $PythonExe (Join-Path $tools 'copy_assets.py') $assets `
-    'images/atlases/power_atlas.sprites/energy_next_turn_power.tres' `
+    'images/atlases/power_atlas.sprites/summon_next_turn_power.tres' `
     'images/atlases/power_atlas.sprites/rika_power.tres' `
+    'images/atlases/power_atlas.sprites/energy_next_turn_power.tres' `
+    'images/atlases/power_atlas.sprites/full_manifestation_power.tres' `
     'images/atlases/power_atlas.sprites/tools_of_the_trade_power.tres' `
     'images/atlases/power_atlas.sprites/which_one_yuta_power.tres'
   if ($LASTEXITCODE -ne 0) { throw '占位能力图标复制失败' }

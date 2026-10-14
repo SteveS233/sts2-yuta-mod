@@ -13,7 +13,7 @@ using MegaCrit.Sts2.Core.Saves.Runs;
 namespace YigguMod;
 
 /// <summary>
-/// 「忧太，要用哪个？」的能力实现 —— 里香在场时，每回合开始时从其他角色的卡池
+/// 「忧太，要用哪个？」的能力实现 —— 里香完全显现时，每回合开始时从其他角色的卡池
 /// 抽 3 张让玩家选 1 张加入手牌，该牌本回合可免费打出。
 ///
 /// 【为什么用 AfterPlayerTurnStart 而不是 AfterEnergyReset】
@@ -21,7 +21,8 @@ namespace YigguMod;
 ///   而「让玩家三选一」需要 choiceContext。官方「交易工具」（ToolsOfTheTradePower）
 ///   也是每回合开始让玩家选牌，用的正是这个钩子。
 ///
-/// 【里香在场才触发】直接查 player.IsOstyMissing —— 当前里香由奥斯提实现。
+/// 【里香完全显现才触发】原作中复制来的术式只能在里香完全显现时使用。
+///   能力本身在本场战斗内一直存在，只是触发受此条件控制。
 ///
 /// 【卡牌生成与「免费打出」】照抄官方「泼溅」（Splash）：
 ///   CharacterCardPools 去掉自己的卡池 = 其他角色的卡池
@@ -60,8 +61,8 @@ public sealed class WhichOneYutaPower : PowerModel
 			return;
 		}
 
-		// 需求：只在里香在场时生效。
-		if (player.IsOstyMissing)
+		// 只在里香完全显现时生效。
+		if (!RikaSummon.IsFullyManifested(player))
 		{
 			return;
 		}

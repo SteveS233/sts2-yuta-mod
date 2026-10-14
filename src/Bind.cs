@@ -7,24 +7,21 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Monsters;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace YigguMod;
 
 /// <summary>
 /// 束缚 —— 0 费技能。稀有度：普通（CardRarity.Common）。
-///   失去 10 点生命，使里香在场层数 +3。升级后 +5。
+///   失去 10 点生命，使完全显现的回合数 +3。升级后 +5。
 ///
-/// 「在场层数」就是 RikaPower 的层数，也就是里香剩余存在的回合数，
-/// 所以这张牌等价于「以 10 点生命换取里香多存在 3 个回合」。
-/// 若该状态已在里香身上，PowerCmd.Apply 会走层数叠加（StackType = Counter），
-/// 也就是把剩余回合数加上去。
+/// 原作的「束缚」：以自我限制换取力量。这里就是以生命换取完全显现多持续几个回合。
+/// 回合数就是 FullManifestationPower 的层数；该状态为 Counter，
+/// PowerCmd.Apply 对已存在的实例会走层数叠加。
 ///
-/// 里香是打出「完全显现」才登场的，她不在场时这张牌没有任何意义
-/// （只会白掉 10 点生命），因此覆写 IsPlayable 让她不在场时直接不可打出 ——
-/// 这与官方「击掌」（HighFive）处理奥斯提不在场的方式完全一致。
-/// OnPlay 里的 CheckMissingWithAnim 作为兜底保留：卡牌可能被效果强制打出。
+/// 只有里香处于完全显现时这张牌才有意义（否则只会白掉 10 点生命），
+/// 因此覆写 IsPlayable 让其余时候直接不可打出 —— 与官方「击掌」（HighFive）的处理一致。
+/// OnPlay 里再查一次作为兜底：卡牌可能被效果强制打出。
 ///
 /// 【美术占位】卡图复用铁甲战士「放血」（同为以生命换收益）。
 /// </summary>
@@ -33,11 +30,11 @@ public sealed class Bind : CardModel
 	/// <summary>失去的生命值。</summary>
 	private const decimal HpLoss = 10m;
 
-	/// <summary>里香在场层数的增加量（升级后 +2，即 3 → 5）。</summary>
+	/// <summary>完全显现回合数的增加量（升级后 +2，即 3 → 5）。</summary>
 	private const decimal DurationGain = 3m;
 
-	/// <summary>动态变量的键名，取自 PowerVar&lt;RikaPower&gt;。</summary>
-	private const string DurationVarName = "RikaPower";
+	/// <summary>动态变量的键名，取自 PowerVar&lt;FullManifestationPower&gt;。</summary>
+	private const string DurationVarName = "FullManifestationPower";
 
 	public Bind()
 		: base(0, CardType.Skill, CardRarity.Common, TargetType.Self)
@@ -47,16 +44,16 @@ public sealed class Bind : CardModel
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
 		new HpLossVar(HpLoss),
-		new PowerVar<RikaPower>(DurationGain)
+		new PowerVar<FullManifestationPower>(DurationGain)
 	};
 
 	protected override IEnumerable<IHoverTip> ExtraHoverTips => new IHoverTip[]
 	{
-		HoverTipFactory.FromPower<RikaPower>()
+		HoverTipFactory.FromPower<FullManifestationPower>()
 	};
 
-	/// <summary>里香不在场时不可打出（与官方「击掌」一致）。</summary>
-	protected override bool IsPlayable => !base.Owner.IsOstyMissing;
+	/// <summary>里香未完全显现时不可打出（与官方「击掌」一致）。</summary>
+	protected override bool IsPlayable => RikaSummon.IsFullyManifested(base.Owner);
 
 	// 暂时复用铁甲战士「放血」的卡图。
 	public override string PortraitPath => ImageHelper.GetImagePath("atlases/card_atlas.sprites/ironclad/bloodletting.tres");
@@ -65,8 +62,8 @@ public sealed class Bind : CardModel
 
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
-		// 兜底：卡牌可能被效果强制打出，此时里香未必在场。
-		if (Osty.CheckMissingWithAnim(base.Owner))
+		// 兜底：卡牌可能被效果强制打出，此时里香未必完全显现。
+		if (!RikaSummon.IsFullyManifested(base.Owner))
 		{
 			return;
 		}
@@ -77,8 +74,8 @@ public sealed class Bind : CardModel
 		await CreatureCmd.Damage(choiceContext, base.Owner.Creature, base.DynamicVars.HpLoss.BaseValue,
 			ValueProp.Unblockable | ValueProp.Unpowered | ValueProp.Move, this, cardPlay);
 
-		// 第二步：延长里香在场层数（层数叠加，即剩余回合数增加）
-		await PowerCmd.Apply<RikaPower>(choiceContext, base.Owner.Osty,
+		// 第二步：延长完全显现（层数叠加，即剩余回合数增加）
+		await PowerCmd.Apply<FullManifestationPower>(choiceContext, RikaSummon.Get(base.Owner),
 			base.DynamicVars[DurationVarName].BaseValue, base.Owner.Creature, this);
 	}
 

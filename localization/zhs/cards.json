@@ -1,16 +1,16 @@
 {
   "FULL_MANIFESTATION.title": "完全显现",
-  "FULL_MANIFESTATION.description": "使[gold]里香[/gold]完全显现5回合。",
+  "FULL_MANIFESTATION.description": "使[gold]里香[/gold][gold]完全显现[/gold]5回合。",
   "CURSED_ENERGY_REINFORCEMENT.title": "咒力强化",
   "CURSED_ENERGY_REINFORCEMENT.description": "获得X点[gold]力量[/gold]，获得X点[gold]敏捷[/gold]，获得{Block:diff()}点[gold]格挡[/gold]。{IfUpgraded:show:\n获得X点能量。|}",
   "KNOCK_IT_DOWN.title": "打下来！",
-  "KNOCK_IT_DOWN.description": "[gold]里香[/gold]造成{OstyDamage:diff()}点伤害，给予{WeakPower:diff()}层[gold]虚弱[/gold]。",
+  "KNOCK_IT_DOWN.description": "[gold]里香[/gold]造成{RikaDamage:diff()}点伤害，给予{WeakPower:diff()}层[gold]虚弱[/gold]。",
   "REVERSE_CURSED_TECHNIQUE.title": "反转术式",
   "REVERSE_CURSED_TECHNIQUE.description": "获得{RegenPower:diff()}层[gold]再生[/gold]。",
   "IMITATION.title": "模仿",
-  "IMITATION.description": "[gold]里香[/gold]造成{OstyDamage:diff()}点伤害。\n[gold]斩杀[/gold]时，获得该敌人身上的所有正面效果（力量除外）。\n夺取的效果仅在里香显现期间生效。",
+  "IMITATION.description": "[gold]里香[/gold]造成{RikaDamage:diff()}点伤害。\n[gold]斩杀[/gold]时，获得该敌人身上的所有正面效果（力量除外）。\n夺取的效果仅在[gold]完全显现[/gold]期间生效。",
   "BIND.title": "束缚",
-  "BIND.description": "失去{HpLoss:diff()}点生命，使[gold]里香[/gold]的在场层数+{RikaPower:diff()}。",
+  "BIND.description": "失去{HpLoss:diff()}点生命，[gold]完全显现[/gold]的回合数+{FullManifestationPower:diff()}。",
   "WHICH_ONE_YUTA.title": "忧太，要用哪个？",
-  "WHICH_ONE_YUTA.description": "里香在场时，每回合开始从 3 张其他角色的{IfUpgraded:show:[gold]升级过的[/gold]|}牌中选择 1 张加入你的[gold]手牌[/gold]。这张牌在本回合免费打出。"
+  "WHICH_ONE_YUTA.description": "[gold]完全显现[/gold]期间，每回合开始从 3 张其他角色的{IfUpgraded:show:[gold]升级过的[/gold]|}牌中选择 1 张加入你的[gold]手牌[/gold]。这张牌在本回合免费打出。"
 }

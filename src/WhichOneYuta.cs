@@ -11,7 +11,7 @@ namespace YigguMod;
 
 /// <summary>
 /// 忧太，要用哪个？ —— 2 费能力牌。稀有度：稀有（CardRarity.Rare）。
-///   里香在场时，每回合开始从 3 张其他角色的牌中选择 1 张加入你的手牌，
+///   里香完全显现时，每回合开始从 3 张其他角色的牌中选择 1 张加入你的手牌，
 ///   这张牌在本回合免费打出。
 ///   升级后：提供的候选牌为「升级过的」。
 ///
@@ -33,7 +33,7 @@ public sealed class WhichOneYuta : CardModel
 
 	protected override IEnumerable<IHoverTip> ExtraHoverTips => new IHoverTip[]
 	{
-		HoverTipFactory.FromPower<RikaPower>()
+		HoverTipFactory.FromPower<FullManifestationPower>()
 	};
 
 	// 暂时复用铁甲战士「恶魔形态」的卡图。

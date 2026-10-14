@@ -12,7 +12,6 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Monsters;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -38,11 +37,12 @@ namespace YigguMod;
 ///   只接受规范实例；也不能写成 ToMutable(层数)：Amount 的 setter 会访问 Owner，
 ///   克隆体尚未绑定 Owner，会抛 NullReferenceException。
 ///
-/// 【整局持续 + 只在里香在场时生效】
-///   夺取记录写进遗物「里香」（Rika.RecordStolenBuff），由它在里香登场时激活、
-///   离场时收回（Rika.ActivateBuffs / DeactivateBuffs，由 RikaPower 驱动）。
-///   本卡斩杀时里香必然在场（否则 Osty.CheckMissingWithAnim 已提前返回），
-///   所以当场挂上的这一份与「里香在场」的条件一致。
+/// 【整局持续 + 只在里香完全显现时生效】
+///   夺取记录写进遗物「约定之戒」（PromiseRing.RecordStolenBuff），由它在里香完全显现时激活、
+///   完全显现结束时收回（ActivateBuffs / DeactivateBuffs，由 FullManifestationPower 驱动）。
+///   本卡只需里香在场即可打出（部分显现也行），所以斩杀时：
+///     · 已完全显现 → 当场挂上一份（此时记录的效果本就处于生效状态）；
+///     · 仅部分显现 → 只记录，等下次完全显现时一并生效。
 ///
 /// 【必须在造成伤害之前快照】
 ///   Creature.RemoveAllPowersAfterDeath() 会在生物死亡时清空其能力，
@@ -65,25 +65,20 @@ public sealed class Imitation : CardModel
 	{
 	}
 
-	/// <summary>标记为召唤物攻击，与官方奥斯提攻击牌一致。</summary>
-	protected override HashSet<CardTag> CanonicalTags => new HashSet<CardTag> { CardTag.OstyAttack };
-
 	protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
 	{
-		new OstyDamageVar(BaseDamage, ValueProp.Move)
+		new RikaDamageVar(BaseDamage, ValueProp.Move)
 	};
 
 	protected override IEnumerable<IHoverTip> ExtraHoverTips => new IHoverTip[]
 	{
 		HoverTipFactory.FromPower<RikaPower>(),
+		HoverTipFactory.FromPower<FullManifestationPower>(),
 		HoverTipFactory.Static(StaticHoverTip.Fatal)
 	};
 
-	/// <summary>里香不在场时卡面泛红。</summary>
-	protected override bool ShouldGlowRedInternal => base.Owner.IsOstyMissing;
-
 	/// <summary>里香不在场时不可打出（与官方「击掌」一致），避免白白浪费一张牌。</summary>
-	protected override bool IsPlayable => !base.Owner.IsOstyMissing;
+	protected override bool IsPlayable => RikaSummon.IsPresent(base.Owner);
 
 	// 暂时复用铁甲战士「进食」的卡图。
 	public override string PortraitPath => ImageHelper.GetImagePath("atlases/card_atlas.sprites/ironclad/feed.tres");
@@ -119,7 +114,8 @@ public sealed class Imitation : CardModel
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
 
-		if (Osty.CheckMissingWithAnim(base.Owner))
+		// 兜底：卡牌可能被效果强制打出，此时里香未必在场。
+		if (!RikaSummon.IsPresent(base.Owner))
 		{
 			return;
 		}
@@ -135,8 +131,8 @@ public sealed class Imitation : CardModel
 			.ToList();
 
 		// ② 里香造成伤害
-		AttackCommand attackCommand = await DamageCmd.Attack(base.DynamicVars.OstyDamage.BaseValue)
-			.FromOsty(base.Owner.Osty, this, cardPlay)
+		AttackCommand attackCommand = await DamageCmd.Attack(base.DynamicVars[RikaDamageVar.DefaultName].BaseValue)
+			.FromRika(RikaSummon.Get(base.Owner), this, cardPlay)
 			.Targeting(target)
 			.WithHitFx("vfx/vfx_attack_blunt", null, "blunt_attack.mp3")
 			.Execute(choiceContext);
@@ -148,8 +144,9 @@ public sealed class Imitation : CardModel
 			return;
 		}
 
-		// ④ 获得正面效果：当场挂一份，同时记进遗物「里香」以便整局持续。
-		Rika rika = base.Owner.Relics.OfType<Rika>().FirstOrDefault();
+		// ④ 记进遗物「约定之戒」以便整局持续；若里香此刻已完全显现，当场挂上一份。
+		PromiseRing ring = base.Owner.Relics.OfType<PromiseRing>().FirstOrDefault();
+		bool applyNow = RikaSummon.IsFullyManifested(base.Owner);
 
 		foreach (KeyValuePair<ModelId, int> stolen in stolenBuffs)
 		{
@@ -158,10 +155,14 @@ public sealed class Imitation : CardModel
 				continue;
 			}
 			PowerModel canonical = ModelDb.GetById<PowerModel>(stolen.Key);
+			ring?.RecordStolenBuff(canonical, stolen.Value);
+			if (!applyNow)
+			{
+				continue;
+			}
 			// 无参 ToMutable()，层数交给 Apply —— 见类注释里的说明。
 			PowerModel fresh = canonical.ToMutable();
 			await PowerCmd.Apply(choiceContext, fresh, base.Owner.Creature, stolen.Value, base.Owner.Creature, this);
-			rika?.RecordStolenBuff(canonical, stolen.Value);
 		}
 	}
 
