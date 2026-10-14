@@ -59,10 +59,19 @@ internal static class YigguAutoSlayTest
 	{
 		ModelDb.Card<Imitation>(),
 		ModelDb.Card<Imitation>(),
-		ModelDb.Card<Imitation>(),
 		ModelDb.Card<KnockItDown>(),
 		ModelDb.Card<Bind>(),
-		ModelDb.Card<WhichOneYuta>()
+		ModelDb.Card<WhichOneYuta>(),
+		ModelDb.Card<RikaClaw>(),
+		ModelDb.Card<CursedBlade>(),
+		ModelDb.Card<QuickDraw>(),
+		ModelDb.Card<RikaGuard>(),
+		ModelDb.Card<RikasCursedEnergy>(),
+		ModelDb.Card<CursedSpeechDontMove>(),
+		ModelDb.Card<AutonomousGuard>(),
+		ModelDb.Card<Devour>(),
+		ModelDb.Card<PureLoveBeam>(),
+		ModelDb.Card<AuthenticMutualLove>()
 	};
 
 	/// <summary>主菜单就绪 → 启动 AutoSlay（整个进程只启动一次）。</summary>

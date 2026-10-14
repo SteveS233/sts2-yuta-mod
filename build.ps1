@@ -61,20 +61,23 @@ if (-not (Test-Path -LiteralPath $PythonExe)) {
 # --- 1. 生成角色资源（复制官方素材到本角色路径 + 重写导入映射 + 剥离 uid）---
 $assets = Join-Path $root 'assets'
 if (-not $SkipAssets) {
+  # assets/ 是纯构建产物，每次从头生成，避免旧文件残留进 pck
+  if (Test-Path -LiteralPath $assets) { Remove-Item -LiteralPath $assets -Recurse -Force }
   Write-Host '==> 生成角色资源' -ForegroundColor Cyan
   & $PythonExe (Join-Path $tools 'make_char_assets.py') $SourceCharacter $CharacterId $assets
   if ($LASTEXITCODE -ne 0) { throw '角色资源生成失败' }
 
-  # 复用官方能力图标作为占位：PowerModel.PackedIconPath 不可覆写，
-  # 因此 images/atlases/power_atlas.sprites/<能力id小写>.tres 必须真实存在。
+  # 复用官方能力图标作为占位。PowerModel.PackedIconPath 不可覆写，指向
+  # images/atlases/power_atlas.sprites/<能力id小写>.tres —— 但这类路径会被游戏的
+  # AtlasResourceLoader 截获，只按名字去官方图集里找，放一个同名 .tres 进去是无效的。
+  # 图集里找不到时它会兜底加载 res://images/powers/<能力id小写>.png，所以占位图标放在那里。
   Write-Host '==> 复制占位能力图标' -ForegroundColor Cyan
   & $PythonExe (Join-Path $tools 'copy_assets.py') $assets `
-    'images/atlases/power_atlas.sprites/summon_next_turn_power.tres' `
-    'images/atlases/power_atlas.sprites/rika_power.tres' `
-    'images/atlases/power_atlas.sprites/energy_next_turn_power.tres' `
-    'images/atlases/power_atlas.sprites/full_manifestation_power.tres' `
-    'images/atlases/power_atlas.sprites/tools_of_the_trade_power.tres' `
-    'images/atlases/power_atlas.sprites/which_one_yuta_power.tres'
+    'images/powers/summon_next_turn_power.png'   'images/powers/rika_power.png' `
+    'images/powers/energy_next_turn_power.png'   'images/powers/full_manifestation_power.png' `
+    'images/powers/thorns_power.png'             'images/powers/autonomous_guard_power.png' `
+    'images/powers/demon_form_power.png'         'images/powers/domain_power.png' `
+    'images/powers/tools_of_the_trade_power.png' 'images/powers/which_one_yuta_power.png'
   if ($LASTEXITCODE -ne 0) { throw '占位能力图标复制失败' }
 }
 if (-not (Test-Path -LiteralPath $assets)) { throw "缺少资源目录: $assets" }

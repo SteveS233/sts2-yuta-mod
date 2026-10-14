@@ -4,5 +4,9 @@
   "WHICH_ONE_YUTA_POWER.title": "憂太，要用哪個？",
   "WHICH_ONE_YUTA_POWER.description": "完全顯現期間，每回合開始時從3張牌中選擇1張加入你的手牌，該牌在本回合可免費打出。候選優先取自里香儲存的術式，不足時用其他角色的牌補足。",
   "FULL_MANIFESTATION_POWER.title": "完全顯現",
-  "FULL_MANIFESTATION_POWER.description": "每回合開始時獲得2點額外能量。\n乙骨受到的攻擊傷害改由里香承受。\n層數為剩餘的回合數，歸零後里香退回部分顯現。"
+  "FULL_MANIFESTATION_POWER.description": "每回合開始時獲得2點額外能量。\n乙骨受到的攻擊傷害改由里香承受。\n層數為剩餘的回合數，歸零後里香退回部分顯現。",
+  "AUTONOMOUS_GUARD_POWER.title": "自發守護",
+  "AUTONOMOUS_GUARD_POWER.description": "每回合開始時，若里香在場，她對隨機一名敵人造成等同於層數的傷害。",
+  "DOMAIN_POWER.title": "領域展開",
+  "DOMAIN_POWER.description": "本場戰鬥中，完全顯現不再減少回合數。"
 }

@@ -14,9 +14,8 @@ namespace YigguMod;
 ///   · 部分显现 —— 由卡牌自己实现（例如「打下来！」由她出手）；
 ///   · 完全显现 —— FullManifestationPower。
 ///
-/// 【图标占位】PowerModel.PackedIconPath 不可覆写，
-/// 因此 images/atlases/power_atlas.sprites/rika_power.tres 必须真实存在，
-/// 由 tools/copy_assets.py 从官方「下回合召唤」图标复制而来。
+/// 【图标占位】res://images/powers/rika_power.png，由 build.ps1 调用 tools/copy_assets.py
+/// 从官方「下回合召唤」图标复制而来（为什么放在这个路径见 build.ps1 的注释）。
 /// </summary>
 public sealed class RikaPower : PowerModel
 {

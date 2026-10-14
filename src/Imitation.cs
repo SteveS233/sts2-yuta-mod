@@ -11,7 +11,6 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace YigguMod;
@@ -30,9 +29,6 @@ namespace YigguMod;
 ///   3. 一旦让每次斩杀都有收益，跨战斗累积的增益会滚雪球。
 /// 现在的做法：每次斩杀都必定有一次三选一（有选择、可见），
 /// 收益是一张只能在完全显现时取用、每次只取一张的牌，储存上限 5 项（不会滚雪球）。
-///
-/// 精英 / 首领用 RoomType 而非地图点类型判断 —— 源码注释警告过二者可能不一致
-/// （例如在 ? 事件里选择开战）。
 ///
 /// 斩杀判定沿用官方写法（进食 / 贪婪之手 / 狩猎）：
 ///   开打前用 ShouldOwnerDeathTriggerFatal() 判断敌人是否免疫斩杀，再结合 WasTargetKilled。
@@ -97,34 +93,8 @@ public sealed class Imitation : CardModel
 			return;
 		}
 
-		// ④ 里香吞下一项术式：三选一，存入约定之戒
-		PromiseRing ring = CopiedTechniques.Ring(base.Owner);
-		if (ring == null)
-		{
-			return;
-		}
-
-		List<CardModel> candidates = CopiedTechniques.OtherCharacterCards(base.Owner);
-		RoomType? roomType = base.Owner.RunState.CurrentRoom?.RoomType;
-		if (roomType == RoomType.Elite || roomType == RoomType.Boss)
-		{
-			List<CardModel> rares = candidates.Where((CardModel c) => c.Rarity == CardRarity.Rare).ToList();
-			if (rares.Count > 0)
-			{
-				candidates = rares;
-			}
-		}
-
-		List<CardModel> options = CopiedTechniques.BuildOffer(base.Owner, candidates, null, CopiedTechniques.OfferCount);
-		if (options.Count == 0)
-		{
-			return;
-		}
-		CardModel chosen = await CardSelectCmd.FromChooseACardScreen(choiceContext, options, base.Owner, canSkip: true);
-		if (chosen != null)
-		{
-			ring.StoreTechnique(chosen);
-		}
+		// ④ 里香吞下一项术式：三选一，存入约定之戒（精英 / 首领战为稀有牌）
+		await CopiedTechniques.DevourAsync(choiceContext, base.Owner, rareInEliteFights: true);
 	}
 
 	protected override void OnUpgrade()

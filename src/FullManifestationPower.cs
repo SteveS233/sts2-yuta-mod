@@ -14,6 +14,7 @@ namespace YigguMod;
 /// 效果（原作：摘下戒指后的五分钟）：
 ///   1. 每回合开始时乙骨获得额外能量（她是近乎无限的咒力库）；
 ///   2. 乙骨受到的攻击伤害改由里香承受（她会自己出手保护忧太）；
+///   （领域展开「真赝相爱」期间不再倒计时，见 DomainPower。）
 ///   3. 复制来的术式（约定之戒里储存的牌）仅在此期间可以取用：
 ///      进入完全显现时选 1 张（RikaSummon.Manifest），「忧太，要用哪个？」每回合再选 1 张。
 ///
@@ -25,8 +26,8 @@ namespace YigguMod;
 ///   超出她剩余生命的部分会溢出回乙骨。
 ///   没有直接挂 DieForYouPower，是因为它会让里香死后尸体留在场上、提示文字也是奥斯提的。
 ///
-/// 【图标占位】images/atlases/power_atlas.sprites/full_manifestation_power.tres
-/// 由 tools/copy_assets.py 从官方「下回合能量」图标复制而来。
+/// 【图标占位】res://images/powers/full_manifestation_power.png，由 build.ps1 调用 tools/copy_assets.py
+/// 从官方「下回合能量」图标复制而来。
 /// </summary>
 public sealed class FullManifestationPower : PowerModel
 {
@@ -44,8 +45,14 @@ public sealed class FullManifestationPower : PowerModel
 
 		await PlayerCmd.GainEnergy(RikaSummon.EnergyPerTurn, player);
 
+		// 领域展开（真赝相爱）期间不倒计时。
+		if (player.Creature.GetPower<DomainPower>() != null)
+		{
+			return;
+		}
+
 		// 剩余回合数 -1；归零时 PowerCmd 会自动移除本状态（ShouldRemoveDueToAmount），
-		// 随后触发 AfterRemoved。
+		// 里香随即退回部分显现。
 		await PowerCmd.Decrement(this);
 	}
 

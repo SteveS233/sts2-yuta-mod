@@ -4,5 +4,9 @@
   "WHICH_ONE_YUTA_POWER.title": "Yuta, Which One?",
   "WHICH_ONE_YUTA_POWER.description": "During Full Manifestation, at the start of each turn choose 1 of 3 cards to add to your hand. It costs 0 this turn. Rika's stored Techniques are offered first; cards from other characters fill the rest.",
   "FULL_MANIFESTATION_POWER.title": "Full Manifestation",
-  "FULL_MANIFESTATION_POWER.description": "At the start of each turn, gain 2 additional Energy.\nAttack damage Yuta would take is dealt to Rika instead.\nThe amount is the number of turns remaining; at 0 Rika returns to partial manifestation."
+  "FULL_MANIFESTATION_POWER.description": "At the start of each turn, gain 2 additional Energy.\nAttack damage Yuta would take is dealt to Rika instead.\nThe amount is the number of turns remaining; at 0 Rika returns to partial manifestation.",
+  "AUTONOMOUS_GUARD_POWER.title": "Autonomous Guard",
+  "AUTONOMOUS_GUARD_POWER.description": "At the start of each turn, if Rika is present, she deals damage equal to the amount to a random enemy.",
+  "DOMAIN_POWER.title": "Domain Expansion",
+  "DOMAIN_POWER.description": "This combat, Full Manifestation no longer counts down."
 }

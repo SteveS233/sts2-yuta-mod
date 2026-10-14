@@ -58,17 +58,13 @@ public sealed class YigguCardPool : CardPoolModel
 	///   InvalidOperationException: Can't generate valid rarity for merchant card type ...
 	/// 并导致房间黑屏卡死。
 	///
-	/// 当前正好是下限（2 / 2 / 1），清单如下，删改任何一张前请先确认不会跌破：
-	///     攻击：KnockItDown(罕见)、Imitation(稀有)
-	///     技能：ReverseCursedTechnique(罕见)、Bind(普通)
-	///     能力：WhichOneYuta(稀有)
-	/// （Basic 的咒力强化、完全显现不计入，商店会过滤掉它们）
+	/// 当前：攻击 6、技能 7、能力 2（Basic 的咒力强化、完全显现不计入，商店会过滤掉它们）。
 	///
 	/// 【事件「药水的未来」的要求更严】它按「稀有度 × 类型」从本卡池里找牌，
 	/// 以下每格至少要有一张非 Basic 牌，否则选该选项会抛
 	///   InvalidOperationException: Tried to create a card for a reward, but we couldn't generate a valid card!
 	///     普通：攻击、技能      罕见：攻击、技能、能力      稀有：攻击、技能、能力
-	/// 目前缺：普通攻击、罕见能力、稀有技能。
+	/// 目前每格都已有牌；删改稀有度或类型前务必确认不会让某一格变空。
 	///
 	/// 卡牌奖励没有这个硬要求：其允许稀有度由池子实际内容推导，
 	/// 再配合 GetNextAllowedRarity 的向上取整 + 环绕，只要还有任意非 Basic 牌就能兜住。
@@ -79,11 +75,25 @@ public sealed class YigguCardPool : CardPoolModel
 		ModelDb.Card<CursedEnergyReinforcement>(),
 		ModelDb.Card<FullManifestation>(),
 
-		// ===== 正式卡池卡牌 =====
-		ModelDb.Card<KnockItDown>(),           // 攻击 / 罕见
-		ModelDb.Card<ReverseCursedTechnique>(), // 技能 / 罕见
-		ModelDb.Card<Imitation>(),             // 攻击 / 稀有
-		ModelDb.Card<Bind>(),                  // 技能 / 普通
-		ModelDb.Card<WhichOneYuta>()           // 能力 / 稀有
+		// ===== 普通 =====
+		ModelDb.Card<RikaClaw>(),              // 攻击
+		ModelDb.Card<CursedBlade>(),           // 攻击
+		ModelDb.Card<QuickDraw>(),             // 攻击
+		ModelDb.Card<Bind>(),                  // 技能
+		ModelDb.Card<RikaGuard>(),             // 技能
+		ModelDb.Card<RikasCursedEnergy>(),     // 技能
+
+		// ===== 罕见 =====
+		ModelDb.Card<KnockItDown>(),           // 攻击
+		ModelDb.Card<ReverseCursedTechnique>(), // 技能
+		ModelDb.Card<CursedSpeechDontMove>(),  // 技能
+		ModelDb.Card<Devour>(),                // 技能
+		ModelDb.Card<AutonomousGuard>(),       // 能力
+
+		// ===== 稀有 =====
+		ModelDb.Card<Imitation>(),             // 攻击
+		ModelDb.Card<PureLoveBeam>(),          // 攻击
+		ModelDb.Card<AuthenticMutualLove>(),   // 技能
+		ModelDb.Card<WhichOneYuta>()           // 能力
 	};
 }
